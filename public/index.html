@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WAIT Clean — Scam Checker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .spinner {
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-top-color: #4f46e5;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .risk-bar-track {
+      background-color: #e5e7eb;
+      border-radius: 9999px;
+      overflow: hidden;
+      height: 12px;
+    }
+    .risk-bar-fill {
+      height: 100%;
+      transition: width 0.5s ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-800">
+  <div class="max-w-2xl mx-auto px-4 py-10">
+    <header class="text-center mb-8">
+      <h1 class="text-3xl sm:text-4xl font-bold text-indigo-600">WAIT Clean</h1>
+      <p class="mt-2 text-gray-500 text-sm sm:text-base">
+        Paste a suspicious message, email, or URL below and we'll check it for scam red flags.
+      </p>
+    </header>
+
+    <main class="bg-white shadow-sm rounded-xl p-5 sm:p-8 border border-gray-100">
+      <form id="check-form">
+        <label for="user-text" class="block text-sm font-medium text-gray-700 mb-2">
+          Suspicious content
+        </label>
+        <textarea
+          id="user-text"
+          name="user-text"
+          rows="8"
+          minlength="10"
+          maxlength="5000"
+          placeholder="Paste the message, email, or link here (10-5000 characters)..."
+          class="w-full rounded-lg border border-gray-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-y"
+          required
+        ></textarea>
+        <div class="flex items-center justify-between mt-2">
+          <span id="char-count" class="text-xs text-gray-400">0 / 5000</span>
+          <span id="input-error" class="text-xs text-red-500 hidden"></span>
+        </div>
+
+        <button
+          type="submit"
+          id="submit-btn"
+          class="mt-4 w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span id="submit-label">Check Now</span>
+          <span id="submit-spinner" class="spinner hidden"></span>
+        </button>
+      </form>
+
+      <div id="api-error" class="mt-4 hidden bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-4"></div>
+
+      <section id="results" class="mt-8 hidden">
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          <span class="text-sm font-medium text-gray-600">Risk level:</span>
+          <span id="risk-badge" class="px-3 py-1 rounded-full text-sm font-semibold"></span>
+        </div>
+
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-sm font-medium text-gray-600">Risk score</span>
+            <span id="risk-score-label" class="text-sm font-semibold text-gray-700"></span>
+          </div>
+          <div class="risk-bar-track">
+            <div id="risk-bar-fill" class="risk-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <h2 class="text-sm font-semibold text-gray-700 mb-2">Red flags</h2>
+          <ul id="reasons-list" class="list-disc list-inside space-y-1 text-sm text-gray-700"></ul>
+        </div>
+
+        <div class="mb-6">
+          <h2 class="text-sm font-semibold text-gray-700 mb-3">Details</h2>
+          <div id="flags-list" class="space-y-3"></div>
+        </div>
+
+        <div class="mb-6">
+          <h2 class="text-sm font-semibold text-gray-700 mb-2">Recommended next steps</h2>
+          <ul id="next-steps-list" class="space-y-2 text-sm"></ul>
+        </div>
+
+        <p id="disclaimer" class="text-xs text-gray-400 border-t border-gray-100 pt-4"></p>
+      </section>
+    </main>
+
+    <footer class="text-center text-xs text-gray-400 mt-8">
+      WAIT Clean is an AI-assisted tool and does not guarantee accuracy. Always use your own judgment.
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById("check-form");
+    const textarea = document.getElementById("user-text");
+    const charCount = document.getElementById("char-count");
+    const inputError = document.getElementById("input-error");
+    const submitBtn = document.getElementById("submit-btn");
+    const submitLabel = document.getElementById("submit-label");
+    const submitSpinner = document.getElementById("submit-spinner");
+    const apiError = document.getElementById("api-error");
+    const results = document.getElementById("results");
+
+    const riskBadge = document.getElementById("risk-badge");
+    const riskScoreLabel = document.getElementById("risk-score-label");
+    const riskBarFill = document.getElementById("risk-bar-fill");
+    const reasonsList = document.getElementById("reasons-list");
+    const flagsList = document.getElementById("flags-list");
+    const nextStepsList = document.getElementById("next-steps-list");
+    const disclaimerEl = document.getElementById("disclaimer");
+
+    const RISK_STYLES = {
+      high: { badge: "bg-red-100 text-red-700", bar: "#dc2626" },
+      medium: { badge: "bg-orange-100 text-orange-700", bar: "#f97316" },
+      low: { badge: "bg-yellow-100 text-yellow-700", bar: "#eab308" },
+      safe: { badge: "bg-green-100 text-green-700", bar: "#16a34a" },
+    };
+
+    const SEVERITY_STYLES = {
+      high: "bg-red-50 border-red-200 text-red-700",
+      medium: "bg-orange-50 border-orange-200 text-orange-700",
+      low: "bg-yellow-50 border-yellow-200 text-yellow-700",
+    };
+
+    textarea.addEventListener("input", () => {
+      charCount.textContent = `${textarea.value.length} / 5000`;
+    });
+
+    function setLoading(isLoading) {
+      submitBtn.disabled = isLoading;
+      submitLabel.textContent = isLoading ? "Checking..." : "Check Now";
+      submitSpinner.classList.toggle("hidden", !isLoading);
+    }
+
+    function resetUI() {
+      inputError.classList.add("hidden");
+      apiError.classList.add("hidden");
+      results.classList.add("hidden");
+    }
+
+    function showInputError(message) {
+      inputError.textContent = message;
+      inputError.classList.remove("hidden");
+    }
+
+    function showApiError(message) {
+      apiError.textContent = message;
+      apiError.classList.remove("hidden");
+    }
+
+    function renderResults(data) {
+      const level = (data.risk_level || "").toLowerCase();
+      const style = RISK_STYLES[level] || RISK_STYLES.medium;
+
+      riskBadge.textContent = level ? level.toUpperCase() : "UNKNOWN";
+      riskBadge.className = `px-3 py-1 rounded-full text-sm font-semibold ${style.badge}`;
+
+      const scorePct = Math.max(0, Math.min(1, data.risk_score || 0)) * 100;
+      riskScoreLabel.textContent = `${Math.round(scorePct)}%`;
+      riskBarFill.style.width = `${scorePct}%`;
+      riskBarFill.style.backgroundColor = style.bar;
+
+      reasonsList.innerHTML = "";
+      (data.reasons || []).forEach((reason) => {
+        const li = document.createElement("li");
+        li.textContent = reason;
+        reasonsList.appendChild(li);
+      });
+
+      flagsList.innerHTML = "";
+      (data.flags || []).forEach((flag) => {
+        const card = document.createElement("div");
+        const severity = (flag.severity || "medium").toLowerCase();
+        const sevClass = SEVERITY_STYLES[severity] || SEVERITY_STYLES.medium;
+        card.className = `border rounded-lg p-3 text-sm ${sevClass}`;
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-semibold capitalize">${escapeHtml(flag.category || "")}</span>
+            <span class="text-xs uppercase font-semibold">${escapeHtml(severity)}</span>
+          </div>
+          <p class="mt-1 text-gray-700">${escapeHtml(flag.description || "")}</p>
+        `;
+        flagsList.appendChild(card);
+      });
+
+      nextStepsList.innerHTML = "";
+      (data.safe_next_steps || []).forEach((step) => {
+        const li = document.createElement("li");
+        li.className = "font-semibold text-gray-800 flex items-start gap-2";
+        li.innerHTML = `<span class="text-indigo-600">&#10003;</span><span>${escapeHtml(step)}</span>`;
+        nextStepsList.appendChild(li);
+      });
+
+      disclaimerEl.textContent = data.disclaimer || "";
+
+      results.classList.remove("hidden");
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      resetUI();
+
+      const text = textarea.value.trim();
+      if (text.length < 10) {
+        showInputError("Please enter at least 10 characters.");
+        return;
+      }
+      if (text.length > 5000) {
+        showInputError("Please enter at most 5000 characters.");
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const response = await fetch("/api/check-scam", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+
+        if (!response.ok) {
+          let message = "Something went wrong while checking this content.";
+          try {
+            const errBody = await response.json();
+            if (errBody && errBody.detail) {
+              message = typeof errBody.detail === "string" ? errBody.detail : message;
+            }
+          } catch (_) {
+            // ignore parse errors
+          }
+          showApiError(message);
+          return;
+        }
+
+        const data = await response.json();
+        renderResults(data);
+      } catch (err) {
+        showApiError("Network error. Please check your connection and try again.");
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>
