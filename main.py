@@ -12,6 +12,7 @@ from pydantic import BaseModel
 app = FastAPI(title="STOP! CHECK! WAIT! Scam Checker")
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+WEB_RISK_API_KEY = os.getenv("WEB_RISK_API_KEY", "")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
 
 
@@ -120,6 +121,17 @@ def extract_json(text: str):
         raise ValueError("AI response was not valid JSON")
 
 
+async def check_web_risk(url: str):
+    endpoint = f"https://webrisk.googleapis.com/v1/uris:search?threatTypes=MALWARE&threatTypes=SOCIAL_ENGINEERING&threatTypes=UNWANTED_SOFTWARE&uri={url}&key={WEB_RISK_API_KEY}"
+
+    async with httpx.AsyncClient(timeout=10) as client:
+        response = await client.get(endpoint)
+
+    if response.status_code != 200:
+        return None
+
+    data = response.json()
+    return data.get("threat")
 async def call_openai(user_content):
     if not OPENAI_API_KEY:
         raise RuntimeError("AI analysis is not configured.")
@@ -211,7 +223,11 @@ async def analyze(req: TextRequest):
 
     mode = req.mode if req.mode in {"message", "link"} else "message"
 
-    if mode == "link":
+    web_risk_result = None
+if mode == "link" and WEB_RISK_API_KEY:
+      web_risk_result = await check_web_risk(text)
+  
+if mode == "link":
         instruction = f"""
 Analyse this URL or link for scam/phishing risk.
 
@@ -235,6 +251,8 @@ Submitted message:
 
     try:
         result = await call_openai(instruction)
+        if web_risk_result:
+          result["risk"] = "HIGH"
         return normalise_result(result)
 
     except Exception as exc:
