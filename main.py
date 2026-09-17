@@ -126,6 +126,7 @@ async def check_web_risk(url: str):
 
     async with httpx.AsyncClient(timeout=10) as client:
         response = await client.get(endpoint)
+   print("WEB RISK DEBUG:", response.status_code, response.text)   
 
     if response.status_code != 200:
         return None
