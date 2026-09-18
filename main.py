@@ -126,13 +126,13 @@ async def check_web_risk(url: str):
 
     async with httpx.AsyncClient(timeout=10) as client:
         response = await client.get(endpoint)
-   print("WEB RISK DEBUG:", response.status_code, response.text)   
+        print("WEB RISK DEBUG:", response.status_code, response.text)   
 
-    if response.status_code != 200:
-        return None
+        if response.status_code != 200:
+             return None
 
-    data = response.json()
-    return data.get("threat")
+        data = response.json()
+        return data.get("threat")
 async def call_openai(user_content):
     if not OPENAI_API_KEY:
         raise RuntimeError("AI analysis is not configured.")
@@ -225,16 +225,23 @@ async def analyze(req: TextRequest):
     mode = req.mode if req.mode in {"message", "link"} else "message"
 
     web_risk_result = None
-if mode == "link" and WEB_RISK_API_KEY:
-      web_risk_result = await check_web_risk(text)
+    if mode == "link" and WEB_RISK_API_KEY:
+        web_risk_result = await check_web_risk(text)
   
-if mode == "link":
+    if mode == "link":
         instruction = f"""
 Analyse this URL or link for scam/phishing risk.
 
 Do not visit or claim to have verified the destination.
 Assess the URL structure, wording, impersonation signals and context that can
 reasonably be inferred from the submitted link.
+Important: An unfamiliar or unrecognised domain is NOT suspicious by itself.
+A domain not containing a recognisable brand or company name is NOT suspicious by itself.
+A common top-level domain such as .com is NOT suspicious by itself.
+Inability to verify a website from the URL alone is uncertainty, NOT evidence of a scam.
+Do not raise the risk level solely because the domain is unfamiliar, generic, or unverifiable.
+Look for concrete indicators such as deceptive lookalike domains, brand impersonation, misleading subdomains, punycode or homograph tricks, suspicious credential or payment paths, or other clear phishing patterns.
+If no meaningful suspicious indicator is present in the URL itself, use LOW while clearly stating that authenticity has not been verified.
 
 Submitted link:
 {text}
