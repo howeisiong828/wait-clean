@@ -19,7 +19,7 @@ def check_rate_limit(client_id: str):
     requests = rate_limit_store.get(client_id, [])        
     requests = [t for t in requests if now - t < RATE_WINDOW]
     if len(requests) >= RATE_LIMIT:
-    return False
+        return False
 
     requests.append(now)
     rate_limit_store[client_id] = requests
