@@ -2,15 +2,29 @@ import os
 import json
 import base64
 import re
+import time
 from typing import Optional
 
 import httpx
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 app = FastAPI(title="STOP! CHECK! WAIT! Scam Checker")
+rate_limit_store = {}
+RATE_LIMIT = 20
+RATE_WINDOW = 3600
+def check_rate_limit(client_id: str):
+    now = time.time() 
+    requests = rate_limit_store.get(client_id, [])        
+    requests = [t for t in requests if now - t < RATE_WINDOW]
+    if len(requests) >= RATE_LIMIT:
+    return False
 
+    requests.append(now)
+    rate_limit_store[client_id] = requests
+    return True
+      
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 WEB_RISK_API_KEY = os.getenv("WEB_RISK_API_KEY", "")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
@@ -220,7 +234,10 @@ def normalise_result(result):
 
 
 @app.post("/analyze")
-async def analyze(req: TextRequest):
+async def analyze(req: TextRequest, request: Request):
+client_id = request.client.host if request.client else "unknown"
+    if not check_rate_limit(client_id):
+        return {"error": "Too many checks. Please try again later."}
     text = req.text.strip()
 
     if not text:
@@ -277,11 +294,16 @@ Submitted message:
 @app.post("/analyze-image")
 async def analyze_image(
     file: UploadFile = File(...),
-    context: Optional[str] = Form(None)
+    context: Optional[str] = Form(None),
+request: Request = None,
 ):
+    client_id = request.client.host if request and request.client else "unknown"
+    if not check_rate_limit(client_id):
+        return {"error": "Too many checks. Please try again later."}
+
     if not OPENAI_API_KEY:
         return {"error": "AI analysis is not configured."}
-
+      
     allowed = {
         "image/jpeg",
         "image/png",
