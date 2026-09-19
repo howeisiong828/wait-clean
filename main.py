@@ -74,6 +74,9 @@ Return ONLY valid JSON using this exact structure:
   "language": "detected language"
 }
 
+URL calibration:
+For links, an unfamiliar domain, a domain without a recognisable brand name, a common TLD such as .com, or inability to verify the destination from the URL alone are NOT scam indicators by themselves. Do not assign CAUTION solely for these reasons. If the URL has no concrete suspicious indicators, classify it LOW while stating that authenticity has not been verified. Raise risk only for concrete signals such as deceptive lookalike domains, impersonation, misleading subdomains, punycode/homograph tricks, suspicious credential/payment paths, or other clear phishing patterns.
+
 Risk guidance:
 
 LOW:
