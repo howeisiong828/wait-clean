@@ -787,6 +787,10 @@ Scam Checker
 <div class="tagline">
 Check before you click, pay or trust.
 </div>
+<div class="tagline">
+Made in Singapore 🇸🇬 · Built for the world
+</div>
+
 
 </section>
 
