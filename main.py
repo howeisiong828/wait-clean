@@ -235,7 +235,7 @@ def normalise_result(result):
 
 @app.post("/analyze")
 async def analyze(req: TextRequest, request: Request):
-client_id = request.client.host if request.client else "unknown"
+    client_id = request.client.host if request.client else "unknown"
     if not check_rate_limit(client_id):
         return {"error": "Too many checks. Please try again later."}
     text = req.text.strip()
