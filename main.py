@@ -343,6 +343,8 @@ request: Request = None,
             "error": "Screenshot is too large. Please use an image under 8 MB."
         }
 
+    qr_data = decode_qr_from_image(image_bytes)
+    
     encoded = base64.b64encode(image_bytes).decode("utf-8")
     mime = file.content_type
 
