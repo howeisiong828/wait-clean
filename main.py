@@ -27,6 +27,25 @@ def check_rate_limit(client_id: str):
     rate_limit_store[client_id] = requests
     return True
       
+def decode_qr_from_image(image_bytes: bytes):
+    try:
+        image_array = np.frombuffer(image_bytes, dtype=np.uint8)
+        image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+
+        if image is None:
+            return None
+
+        detector = cv2.QRCodeDetector()
+        data, points, _ = detector.detectAndDecode(image)
+
+        if data and points is not None:
+            return data.strip()
+
+        return None
+
+    except Exception:
+        return None
+
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 WEB_RISK_API_KEY = os.getenv("WEB_RISK_API_KEY", "")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
