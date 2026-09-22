@@ -830,7 +830,7 @@ Made in Singapore ·  Built for the world
 <button class="action" onclick="openPanel('screenshot')">
 <div class="icon">▣</div>
 <div>
-<strong>Check Screenshot</strong>
+<strong>Check Screenshot or QR Code</strong>
 <span>Upload a screenshot of a message, chat or website.</span>
 </div>
 </button>
