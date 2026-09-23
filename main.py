@@ -861,8 +861,8 @@ Made in Singapore ·  Built for the world
 <h2>Check Screenshot or QR code</h2>
 
 <p class="helper">
-Upload a screenshot. WAIT will examine the visible text and other
-warning signs. JPG, PNG and WEBP up to 8 MB.
+Upload a screenshot, photo or QR code. We will examine the visible content and
+warning signs. QR codes can be checked without opening the website. JPG, PNG and WEBP up to 8 MB.
 </p>
 
 <div class="upload">
