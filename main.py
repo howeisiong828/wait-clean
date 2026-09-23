@@ -858,7 +858,7 @@ Made in Singapore ·  Built for the world
 
 <section id="screenshot" class="panel">
 
-<h2>Check Screenshot</h2>
+<h2>Check Screenshot or QR code</h2>
 
 <p class="helper">
 Upload a screenshot. WAIT will examine the visible text and other
