@@ -884,7 +884,7 @@ onchange="previewImage()">
 <input
 id="imageContext"
 type="text"
-placeholder="Optional: Tell us what worries you. Share more information for a more detailed check">
+placeholder="Optional: Tell us what worries you for a more detailed check">
 
 <button class="primary" onclick="checkImage()">
 Analyse Screenshot
