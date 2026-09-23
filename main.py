@@ -887,7 +887,7 @@ type="text"
 placeholder="Optional: Tell us what worries you for a more detailed check">
 
 <button class="primary" onclick="checkImage()">
-Analyse Screenshot
+Analyse Image or QR code
 </button>
 
 </section>
