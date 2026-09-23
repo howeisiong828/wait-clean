@@ -831,7 +831,7 @@ Made in Singapore ·  Built for the world
 <div class="icon">▣</div>
 <div>
 <strong>Check Screenshot or QR Code</strong>
-<span>Upload a screenshot of a message, chat or website.</span>
+<span>Upload a screenshot, photo or QR code.</span>
 </div>
 </button>
 
