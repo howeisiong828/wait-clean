@@ -867,7 +867,7 @@ warning signs. QR codes can be checked without opening the website. JPG, PNG and
 
 <div class="upload">
 
-<strong>Choose a screenshot</strong>
+<strong>Choose a screenshot, photo or QR code</strong>
 
 <br>
 
