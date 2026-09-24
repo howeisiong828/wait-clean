@@ -293,7 +293,7 @@ Submitted link:
 Analyse this message for scam and social-engineering risk.
 
 Pay attention to the stage of the conversation. An apparently friendly opening
-from an unknown person can still be an impersonation setup.
+from an unknown person can still be an impersonation setup. Do not raise the risk level merely because a message is unsolicited or its sender cannot be independently verified. If there is no suspicious link, payment request, request for credentials or OTP, impersonation inconsistency, threat, unusual urgency, or other concrete scam indicator, use LOW risk and clearly state that authenticity cannot be confirmed from the message alone.
 
 Submitted message:
 {text}
