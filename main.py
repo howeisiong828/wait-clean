@@ -899,7 +899,7 @@ Analyse Image or QR code
 
 <p class="helper">
 Paste the suspicious URL exactly as you received it.
-WAIT will assess warning signs without telling you to open it.
+We'll assess the link for warning signs without asking you to open or visit it.
 </p>
 
 <input
