@@ -239,7 +239,7 @@ def normalise_result(result):
         "summary": str(
             result.get(
                 "summary",
-                "WAIT could not confidently classify this content."
+                "We could not confidently classify this content."
             )
         ),
         "signals": [str(x) for x in signals][:8],
@@ -307,7 +307,7 @@ Submitted message:
 
     except Exception as exc:
         return {
-            "error": "WAIT could not complete the AI analysis.",
+            "error": "We could not complete the AI analysis.",
             "detail": str(exc)
         }
 
@@ -392,7 +392,7 @@ Do not declare the content safe merely because no payment request has appeared y
 
     except Exception as exc:
         return {
-            "error": "WAIT could not analyse this screenshot.",
+            "error": "We could not analyse this screenshot.",
             "detail": str(exc)
         }
 
@@ -935,7 +935,7 @@ Check Message
 
 
 <div id="loading" class="loading">
-WAIT is checking...
+We are checking...
 </div>
 
 
@@ -959,7 +959,7 @@ requests independently before clicking, paying or sharing sensitive information.
 </p>
 
 <p>
-WAIT provides risk guidance, not a guarantee that content is safe or fraudulent.
+We provide risk guidance, not a guarantee that content is safe or fraudulent.
 </p>
 
 <p class="singapore">
@@ -1050,7 +1050,7 @@ async function checkText(mode) {
     } catch (error) {
 
         showError(
-            "WAIT could not connect to the analysis service. Please try again."
+            "We could not connect to the analysis service. Please try again."
         );
 
     } finally {
@@ -1119,7 +1119,7 @@ async function checkImage() {
     } catch (error) {
 
         showError(
-            "WAIT could not analyse this screenshot. Please try again."
+            "We could not analyse this screenshot. Please try again."
         );
 
     } finally {
@@ -1188,12 +1188,12 @@ function renderResult(data) {
             ${escapeHtml(data.summary || "")}
         </div>
 
-        <h3>What WAIT noticed</h3>
+        <h3>What we noticed</h3>
         <ul>
             ${signals || "<li>No specific warning signs were returned.</li>"}
         </ul>
 
-        <h3>What WAIT cannot verify</h3>
+        <h3>What we cannot verify</h3>
         <div class="uncertainty">
             ${escapeHtml(data.uncertainty || "Authenticity cannot be independently verified from this submission alone.")}
         </div>
