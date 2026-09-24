@@ -1508,7 +1508,7 @@ function showScamHelp() {
     };
 
     const selected = help[type];
-
+    result.style.display = "block";
     result.innerHTML = `
         <div class="result">
             <h3>${selected.title}</h3>
