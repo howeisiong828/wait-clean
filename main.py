@@ -698,9 +698,16 @@ input:focus {
     line-height: 1.5;
 }
 
-.history-btn {
-    width: 100%;
+.community-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
     margin-top: 17px;
+}
+
+.history-btn,
+.community-btn {
+    width: 100%;
     padding: 14px;
     border-radius: 13px;
     border: 1px solid var(--border);
@@ -708,6 +715,10 @@ input:focus {
     color: var(--blue);
     font-weight: 800;
     cursor: pointer;
+}
+
+.history-btn {
+    margin-top: 17px;
 }
 
 .history {
@@ -955,6 +966,16 @@ View last 10 checks
 </button>
 
 <div id="history" class="history"></div>
+<div class="community-actions">
+    <button class="community-btn" onclick="shareApp()">
+        Share App
+    </button>
+
+    <button class="community-btn" onclick="rateApp()">
+        Rate App
+    </button>
+</div>
+
 
 
 <section class="safety">
@@ -1350,6 +1371,47 @@ function clearHistory() {
     renderHistory();
 }
 
+
+const APP_SHARE_URL = window.location.origin;
+const APP_STORE_URL = "";
+
+async function shareApp() {
+    const shareData = {
+        title: "STOP! CHECK! WAIT!",
+        text: "Check suspicious messages, links, screenshots and QR codes for scam warning signs before you act.",
+        url: APP_SHARE_URL
+    };
+
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+            return;
+        }
+
+        await navigator.clipboard.writeText(APP_SHARE_URL);
+        alert("App link copied. You can now share it with family and friends.");
+    } catch (error) {
+        if (error && error.name === "AbortError") {
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(APP_SHARE_URL);
+            alert("App link copied. You can now share it with family and friends.");
+        } catch {
+            alert("We could not open sharing on this device.");
+        }
+    }
+}
+
+function rateApp() {
+    if (!APP_STORE_URL) {
+        alert("Rating will be available when the app is published in the app store.");
+        return;
+    }
+
+    window.open(APP_STORE_URL, "_blank", "noopener,noreferrer");
+}
 
 function escapeHtml(value) {
 
