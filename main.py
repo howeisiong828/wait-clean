@@ -919,7 +919,7 @@ Check Link
 <h2>Paste Message</h2>
 
 <p class="helper">
-Paste the full message if possible. WAIT can analyse multilingual
+Paste the full message if possible. We can analyse multilingual
 content and early-stage social engineering.
 </p>
 
