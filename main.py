@@ -1047,8 +1047,12 @@ async function checkText(mode) {
                 mode: mode
             })
         });
+        if (!response.ok) {
+    throw new Error("Analysis service returned an error.");
+}
 
         const data = await response.json();
+        
 
         handleResult(data, mode, text);
 
@@ -1112,6 +1116,10 @@ async function checkImage() {
             method: "POST",
             body: form
         });
+
+        if (!response.ok) {
+            throw new Error("Image analysis service returned an error.");
+        }
 
         const data = await response.json();
 
