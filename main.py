@@ -1134,13 +1134,7 @@ function handleResult(data, type, source) {
 
         let message = escapeHtml(data.error);
 
-        if (data.detail) {
-            message +=
-                "<br><small>" +
-                escapeHtml(data.detail) +
-                "</small>";
-        }
-
+        
         showError(message);
 
         return;
