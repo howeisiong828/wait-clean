@@ -575,7 +575,7 @@ body {
 
 textarea,
 input[type="url"],
-input[type="text"] {
+input[type="text"], select {
     width: 100%;
     border: 1px solid #bdcde2;
     background: white;
@@ -851,7 +851,6 @@ Made in Singapore ·  Built for the world
 </div>
 </button>
 
-
 <button class="action" onclick="openPanel('link')">
 <div class="icon">↗</div>
 <div>
@@ -868,10 +867,40 @@ Made in Singapore ·  Built for the world
 <span>Check an SMS, WhatsApp, email or chat message.</span>
 </div>
 </button>
+<button class="action" onclick="openPanel('scammed')">
+<div class="icon">!</div>
+<div>
+<strong>I Think I've Been Scammed</strong>
+<span>Get immediate steps to help limit the damage.</span>
+</div>
+</button>
+
 
 </section>
 
+<section id="scammed" class="panel">
 
+<h2>I Think I've Been Scammed</h2>
+<p class="hint">Tell us what happened so we can show you the most important next steps.</p>
+
+<div class="field">
+<label>What happened?</label>
+
+<select id="scammedType">
+<option value="">Choose one...</option>
+<option value="money">I sent or transferred money</option>
+<option value="banking">I shared banking, card or OTP details</option>
+<option value="access">I installed an app or gave someone access to my device</option>
+<option value="link">I clicked a link or entered personal information</option>
+<option value="other">Something else happened</option>
+</select>
+</div>
+
+<button class="primary" onclick="showScamHelp()">Show me what to do now</button>
+
+<div id="scammedResult"></div>
+
+</section>
 <section id="screenshot" class="panel">
 
 <h2>Check Screenshot or QR code</h2>
@@ -1411,6 +1440,85 @@ function rateApp() {
     }
 
     window.open(APP_STORE_URL, "_blank", "noopener,noreferrer");
+}
+
+function showScamHelp() {
+    const type = document.getElementById("scammedType").value;
+    const result = document.getElementById("scammedResult");
+
+    if (!type) {
+        result.innerHTML = `
+            <div class="result">
+                <strong>Please choose what happened first.</strong>
+            </div>
+        `;
+        return;
+    }
+
+    const help = {
+        money: {
+            title: "You sent or transferred money",
+            steps: [
+                "Contact your bank or payment provider immediately using its official app, website or phone number. Tell them you may have been scammed and ask whether the transaction can be stopped, recalled or frozen.",
+                "Do not send any more money, even if someone promises to recover what you lost.",
+                "Save screenshots, receipts, transaction details, phone numbers, messages and other evidence.",
+                "Report the incident to the police or official scam-reporting service in your country as soon as possible."
+            ]
+        },
+
+        banking: {
+            title: "You shared banking, card or OTP details",
+            steps: [
+                "Contact your bank or card provider immediately using an official channel and tell them what information was exposed.",
+                "Ask them to secure affected accounts or cards and follow their instructions.",
+                "Change affected passwords from a trusted device. Do not reuse the old password.",
+                "Watch your accounts closely for transactions or changes you do not recognise."
+            ]
+        },
+
+        access: {
+            title: "You installed an app or gave someone access to your device",
+            steps: [
+                "Stop communicating with the person and do not approve any more requests.",
+                "Disconnect the affected device from the internet if someone may still have remote access.",
+                "Using another trusted device, contact your bank immediately if banking or payment information may have been exposed.",
+                "Remove suspicious remote-access apps and secure important accounts. If you are unsure whether the device is clean, get help from a trusted technical professional."
+            ]
+        },
+
+        link: {
+            title: "You clicked a link or entered personal information",
+            steps: [
+                "Close the suspicious page and do not enter any more information.",
+                "If you entered a password, change it immediately on the real service using its official app or website.",
+                "If that password was reused elsewhere, change it on those accounts too.",
+                "If you entered banking, card or payment details, contact the relevant bank or provider immediately."
+            ]
+        },
+
+        other: {
+            title: "Something else happened",
+            steps: [
+                "Stop communicating with the suspected scammer and do not send money or additional information.",
+                "Save messages, screenshots, phone numbers, links and transaction details as evidence.",
+                "Contact any bank, payment provider or account provider that may be affected using official channels.",
+                "Report the incident to the appropriate police or official scam-reporting service in your country."
+            ]
+        }
+    };
+
+    const selected = help[type];
+
+    result.innerHTML = `
+        <div class="result">
+            <h3>${selected.title}</h3>
+            <p><strong>Act as soon as you can:</strong></p>
+            <ol>
+                ${selected.steps.map(step => `<li>${step}</li>`).join("")}
+            </ol>
+            <p><strong>Important:</strong> Never trust a phone number, link or contact detail supplied by the suspected scammer. Find the organisation's official contact details independently.</p>
+        </div>
+    `;
 }
 
 function escapeHtml(value) {
