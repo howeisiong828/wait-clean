@@ -104,7 +104,7 @@ Return ONLY valid JSON using this exact structure:
   ],
   "uncertainty": "what cannot be verified from the submitted content",
   "actions": [
-    "practical safe next step"
+    "practical next step appropriate to the actual risk; for LOW risk with no meaningful scam indicators, avoid unnecessary warnings or verification steps"
   ],
   "language": "detected language"
 }
