@@ -115,7 +115,7 @@ For links, an unfamiliar domain, a domain without a recognisable brand name, a c
 Risk guidance:
 
 LOW:
-No meaningful scam indicators found, but authenticity still cannot be guaranteed.
+No meaningful scam indicators found. Use LOW risk. Do not invent hypothetical scam scenarios or recommend identity verification unless the submitted content contains a concrete reason for concern. For ordinary benign messages, state plainly that no obvious warning signs were detected.
 
 CAUTION:
 There are suspicious or unverifiable signals that justify independent checking.
