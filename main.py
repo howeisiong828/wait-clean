@@ -311,8 +311,8 @@ Submitted message:
 
     except Exception as exc:
         return {
-            "error": "We could not complete the AI analysis.",
-            "detail": str(exc)
+            "error": "We could not complete the AI analysis."
+          
         }
 
 
@@ -396,8 +396,8 @@ Do not declare the content safe merely because no payment request has appeared y
 
     except Exception as exc:
         return {
-            "error": "We could not analyse this screenshot.",
-            "detail": str(exc)
+            "error": "We could not analyse this screenshot."
+        
         }
 
 
