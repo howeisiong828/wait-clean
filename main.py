@@ -267,7 +267,8 @@ async def analyze(req: TextRequest, request: Request):
 
     if not text:
         return {"error": "Please enter something to check."}
-
+    if len(text) > 10000:
+        return {"error": "Message is too long. Please keep it under 10,000 characters."}
     mode = req.mode if req.mode in {"message", "link"} else "message"
 
     web_risk_result = None
