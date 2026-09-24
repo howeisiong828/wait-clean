@@ -26,7 +26,12 @@ def check_rate_limit(client_id: str):
     requests.append(now)
     rate_limit_store[client_id] = requests
     return True
-      
+def get_client_id(request: Request):
+    forwarded_for = request.headers.get("x-forwarded-for", "")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+
+    return request.client.host if request.client else "unknown"      
 def decode_qr_from_image(image_bytes: bytes):
     try:
         image_array = np.frombuffer(image_bytes, dtype=np.uint8)
@@ -255,7 +260,7 @@ def normalise_result(result):
 
 @app.post("/analyze")
 async def analyze(req: TextRequest, request: Request):
-    client_id = request.client.host if request.client else "unknown"
+    client_id = get_client_id(request)       
     if not check_rate_limit(client_id):
         return {"error": "Too many checks. Please try again later."}
     text = req.text.strip()
@@ -317,7 +322,7 @@ async def analyze_image(
     context: Optional[str] = Form(None),
 request: Request = None,
 ):
-    client_id = request.client.host if request and request.client else "unknown"
+    client_id = get_client_id(request)
     if not check_rate_limit(client_id):
         return {"error": "Too many checks. Please try again later."}
 
