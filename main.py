@@ -992,7 +992,7 @@ We provide risk guidance, not a guarantee that content is safe or fraudulent.
 </p>
 
 <p class="singapore">
-Built in Singapore 🇸🇬 · Protecting people everywhere
+Built in Singapore · Protecting people everywhere
 </p>
 
 </section>
