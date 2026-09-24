@@ -889,6 +889,7 @@ onchange="previewImage()">
 <input
 id="imageContext"
 type="text"
+maxlength="1000"
 placeholder="Optional: Tell us what worries you for a more detailed check">
 
 <button class="primary" onclick="checkImage()">
@@ -909,6 +910,7 @@ We'll assess the link for warning signs without asking you to open or visit it.
 
 <input
 id="linkInput"
+maxlength="10000"
 type="url"
 placeholder="https://example.com/...">
 
@@ -930,6 +932,7 @@ content and early-stage social engineering.
 
 <textarea
 id="messageInput"
+maxlength="10000"
 placeholder="Paste the suspicious message here..."></textarea>
 
 <button class="primary" onclick="checkText('message')">
