@@ -907,6 +907,25 @@ Made in Singapore ·  Built for the world
 <div id="scammedResult"></div>
 
 </section>
+<section id="call" class="panel">
+
+<h2>Check Suspicious Call</h2>
+
+<p class="helper">
+Tell us what the caller said, claimed to be, or asked you to do. Include as much detail as you remember.
+</p>
+
+<textarea
+id="callInput"
+maxlength="10000"
+placeholder="Example: The caller said he was from my bank and told me to transfer my money to another account..."></textarea>
+
+<button class="primary" onclick="checkCall()">
+Analyse Call
+</button>
+
+</section>
+
 <section id="screenshot" class="panel">
 
 <h2>Check Screenshot or QR code</h2>
