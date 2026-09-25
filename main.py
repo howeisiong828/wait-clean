@@ -638,7 +638,7 @@ input:focus {
 }
 
 .result {
-    display: none;
+    display: block;
     margin-top: 20px;
     border-radius: 18px;
     padding: 22px;
