@@ -996,9 +996,12 @@ View last 10 checks
 
 <div id="history" class="history"></div>
 <div class="community-actions">
-    <button class="community-btn" onclick="shareApp()">
-        Share App
-    </button>
+        <button class="community-btn" onclick="shareApp()">
+    Share App
+    <span style="display:block; font-size:13px; font-weight:400; margin-top:5px;">
+        Share this with someone you care about. It might help them avoid a scam.
+    </span>
+</button>    
 
     <button class="community-btn" onclick="rateApp()">
         Rate App
