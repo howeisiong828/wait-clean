@@ -875,7 +875,13 @@ Made in Singapore ·  Built for the world
 </div>
 </button>
 
-
+<button class="action" onclick="openPanel('call')">
+<div class="icon">☎</div>
+<div>
+<strong>Check Suspicious Call</strong>
+<span>Tell us what the caller said or asked you to do.</span>
+</div>
+</button>
 </section>
 
 <section id="scammed" class="panel">
