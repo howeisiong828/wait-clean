@@ -1003,9 +1003,12 @@ View last 10 checks
     </span>
 </button>    
 
-    <button class="community-btn" onclick="rateApp()">
-        Rate App
-    </button>
+<button class="community-btn" onclick="rateApp()">
+          Rate App
+          <span style="display:block; font-size:13px; font-weight:400; margin-top:5px;">
+            Found this app useful? Help us by leaving a rating.
+          </span>
+        </button>        
 </div>
 
 
