@@ -920,7 +920,7 @@ id="callInput"
 maxlength="10000"
 placeholder="Example: The caller said he was from my bank and told me to transfer my money to another account..."></textarea>
 
-<button class="primary" onclick="checkCall()">
+<button class="primary" onclick="checkText('call')">
 Analyse Call
 </button>
 
@@ -1100,19 +1100,23 @@ function setLoading(on) {
 
 
 async function checkText(mode) {
-
-    const input =
-        mode === "link"
+const input =
+    mode === "link"
         ? document.getElementById("linkInput")
-        : document.getElementById("messageInput");
+        : mode === "call"
+            ? document.getElementById("callInput")
+            : document.getElementById("messageInput");
+        
 
     const text = input.value.trim();
 
     if (!text) {
-        alert(
-            mode === "link"
-            ? "Please paste a link first."
-            : "Please paste a message first."
+        alert(mode === "link"
+    ? "Please paste a link first."
+    : mode === "call"
+        ? "Please tell us what happened on the call first."
+        : "Please paste a message first."
+            
         );
         return;
     }
