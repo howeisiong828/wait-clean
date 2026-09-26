@@ -671,18 +671,21 @@ input:focus {
 }
 
 .risk.HIGH {
-    background: #ffebee;
+    background: #ffcdd2;
     color: var(--red);
+    font-weight: 800:
 }
 
 .risk.CAUTION {
     background: #fff4dc;
     color: var(--amber);
+    font-weight: 800:
 }
 
 .risk.LOW {
-    background: #e7f7ef;
+    background: #c8e6c9;
     color: var(--green);
+font-weight: 800:
 }
 
 .summary {
@@ -1291,7 +1294,7 @@ function renderResult(data) {
     result.innerHTML = `
         <div class="risk ${risk}">
             ${escapeHtml(risk)} RISK
-            Risk score: ${escapeHtml(data.risk_score ?? 0)}/100
+<div style="margin-top:10px;">Risk score: ${escapeHtml(data.risk_score ?? 0)}/100</div>
         </div>
 
         <div class="summary">
