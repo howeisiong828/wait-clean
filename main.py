@@ -293,6 +293,18 @@ If no meaningful suspicious indicator is present in the URL itself, use LOW whil
 Submitted link:
 {text}
 """
+    elif mode == "call":
+        instruction = f"""
+Analyse this description of a suspicious phone call for scam and social-engineering risk.
+
+Treat the submitted text as the user's recollection of what a caller said or asked them to do, not as a received message.
+Focus on impersonation, urgency, secrecy, requests for money, banking details, OTPs, passwords, personal information, links, app installation, or remote access.
+Do not assume the caller is fraudulent solely because the caller is unknown.
+Clearly distinguish warning signs from things that cannot be verified.
+
+Submitted call:
+{text}
+"""                
     else:
         instruction = f"""
 Analyse this message for scam and social-engineering risk.
