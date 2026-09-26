@@ -103,6 +103,7 @@ Return ONLY valid JSON using this exact structure:
 
 {
   "risk": "LOW" | "CAUTION" | "HIGH",
+  "risk_score" 0,
   "summary": "short plain-language assessment",
   "signals": [
     "specific reason based on the submitted content"
@@ -118,7 +119,7 @@ URL calibration:
 For links, an unfamiliar domain, a domain without a recognisable brand name, a common TLD such as .com, or inability to verify the destination from the URL alone are NOT scam indicators by themselves. Do not assign CAUTION solely for these reasons. If the URL has no concrete suspicious indicators, classify it LOW while stating that authenticity has not been verified. Raise risk only for concrete signals such as deceptive lookalike domains, impersonation, misleading subdomains, punycode/homograph tricks, suspicious credential/payment paths, or other clear phishing patterns.
 
 Risk guidance:
-
+Risk score: LOW = 0-29, CAUTION = 30-69, HIGH = 70-100. Choose a score within the matching range based on the strength and number of warning signs.
 LOW:
 No meaningful scam indicators found. Use LOW risk. Do not invent hypothetical scam scenarios or recommend identity verification unless the submitted content contains a concrete reason for concern. For ordinary benign messages, state plainly that no obvious warning signs were detected.
 
@@ -222,7 +223,7 @@ def normalise_result(result):
 
     if risk not in {"LOW", "CAUTION", "HIGH"}:
         risk = "CAUTION"
-
+    risk_score = max(0, min(100, int(result.get("risk_score", 0) or 0)))
     signals = result.get("signals", [])
     actions = result.get("actions", [])
 
@@ -240,6 +241,7 @@ def normalise_result(result):
 
     return {
         "risk": risk,
+        "risk_score": risk_score,
         "summary": str(
             result.get(
                 "summary",
@@ -1289,6 +1291,7 @@ function renderResult(data) {
     result.innerHTML = `
         <div class="risk ${risk}">
             ${escapeHtml(risk)} RISK
+            Risk score: ${escapeHtml(data.risk_score ?? 0)}/100
         </div>
 
         <div class="summary">
