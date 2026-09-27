@@ -1301,7 +1301,9 @@ function renderResult(data) {
             ${escapeHtml(risk)} RISK
 <div style="margin-top:10px;">Risk score: ${escapeHtml(data.risk_score ?? 0)}/100</div>
         </div>
-
+        <div style="margin:14px 0 18px; font-weight:800; text-align:center;">
+    👍 You did the right thing by checking first.
+</div>
         <div class="summary">
             ${escapeHtml(data.summary || "")}
         </div>
@@ -1325,9 +1327,7 @@ function renderResult(data) {
         <div class="uncertainty">
             ${escapeHtml(data.language || "Unknown")}
         </div>
-        <div style="margin-top:20px; font-weight:800; text-align:center;">
-    👍 You did the right thing by checking first.
-</div>
+      
     `;
 
     result.style.display = "block";
