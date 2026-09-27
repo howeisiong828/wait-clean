@@ -125,7 +125,7 @@ No meaningful scam indicators found. Use LOW risk. Do not invent hypothetical sc
 
 CAUTION:
 There are suspicious or unverifiable signals that justify independent checking.
-
+A claimed identity alone is not automatically suspicious. However, when an unsolicited or unknown contact claims to be someone the recipient knows AND includes another setup signal — such as a changed number, vague "favour," unusual request to continue the conversation, secrecy, urgency, or trust-building before a later request — classify at least CAUTION even if no money, link, OTP or credential request has appeared yet. Ordinary family or social messages with no additional suspicious signal may remain LOW.
 HIGH:
 There are strong scam indicators such as credential theft, money requests,
 malicious-looking links, impersonation plus pressure, guaranteed investment
