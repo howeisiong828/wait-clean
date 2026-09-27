@@ -661,31 +661,34 @@ input:focus {
 }
 
 .risk {
-    display: inline-block;
-    font-size: 14px;
-    font-weight: 900;
-    letter-spacing: 1px;
-    padding: 7px 11px;
-    border-radius: 999px;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    line-height: 1.35;
+    padding: 16px 18px;
+    border-radius: 14px;
     margin-bottom: 13px;
 }
 
 .risk.HIGH {
     background: #ffcdd2;
     color: var(--red);
-    font-weight: 800:
+    font-weight: 800;
 }
 
 .risk.CAUTION {
     background: #fff4dc;
     color: var(--amber);
-    font-weight: 800:
+    font-weight: 800;
 }
 
 .risk.LOW {
     background: #c8e6c9;
     color: var(--green);
-font-weight: 800:
+font-weight: 800;
 }
 
 .summary {
