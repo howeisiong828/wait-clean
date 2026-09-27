@@ -1325,6 +1325,9 @@ function renderResult(data) {
         <div class="uncertainty">
             ${escapeHtml(data.language || "Unknown")}
         </div>
+        <div style="margin-top:20px; font-weight:800; text-align:center;">
+    👍 You did the right thing by checking first.
+</div>
     `;
 
     result.style.display = "block";
