@@ -862,7 +862,9 @@ Your savings took years to build. Don’t let a scammer take them in seconds.
 
 </section>
 
-
+<div style="text-align:center; font-weight:800; margin:4px 0 14px;">
+Something feels off? Check before you act.
+</div>
 <section class="actions">
 
 <button class="action" onclick="openPanel('screenshot')">
