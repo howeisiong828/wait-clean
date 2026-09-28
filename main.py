@@ -1588,6 +1588,7 @@ function escapeHtml(value) {
 
     const div =
         document.createElement("div");
+        
 
     div.textContent =
         String(value ?? "");
@@ -1600,3 +1601,7 @@ function escapeHtml(value) {
 </body>
 </html>
 """
+@app.get("/privacy", response_class=HTMLResponse)
+def privacy_policy():
+    with open("privacy.html", "r", encoding="utf-8") as f:
+        return f.read()
