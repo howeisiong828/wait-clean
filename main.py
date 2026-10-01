@@ -426,9 +426,10 @@ Do not open, visit, execute, or navigate to anything contained in the QR code.""
         return normalise_result(result)
 
     except Exception as exc:
-        return {
-            "error": "We could not analyse this screenshot."
-        }
+    print("ANALYZE_IMAGE_ERROR:", repr(exc))
+    return {
+        "error": "We could not analyse this screenshot."
+    }
         
 
 
