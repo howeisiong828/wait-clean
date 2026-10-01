@@ -363,6 +363,7 @@ request: Request = None,
         }
 
     qr_data = decode_qr_from_image(image_bytes)
+    print("QR_DECODE_RESULT:", repr(qr_data))
     screenshot_web_risk = None
     screenshot_url = None
     
