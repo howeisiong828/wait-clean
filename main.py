@@ -363,6 +363,8 @@ request: Request = None,
         }
 
     qr_data = decode_qr_from_image(image_bytes)
+    screenshot_web_risk = None
+    screenshot_url = None
     
     encoded = base64.b64encode(image_bytes).decode("utf-8")
     mime = file.content_type
@@ -404,16 +406,21 @@ Do not declare the content safe merely because no payment request has appeared y
                 "text": f"Optional user context: {context[:1000]}"
             }
         )
+        if qr_data and WEB_RISK_API_KEY:
+        screenshot_web_risk = await check_web_risk(qr_data)
 
     try:
         result = await call_openai(user_content)
+        if screenshot_web_risk:
+            result["risk"] = "HIGH"
+            result["risk_score"] = max(70, int(result.get("risk_score", 0) or 0))
         return normalise_result(result)
 
     except Exception as exc:
         return {
             "error": "We could not analyse this screenshot."
-        
         }
+        
 
 
 @app.get("/", response_class=HTMLResponse)
