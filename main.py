@@ -407,7 +407,7 @@ Do not declare the content safe merely because no payment request has appeared y
             }
         )
         if qr_data and WEB_RISK_API_KEY:
-        screenshot_web_risk = await check_web_risk(qr_data)
+            screenshot_web_risk = await check_web_risk(qr_data)
 
     try:
         result = await call_openai(user_content)
