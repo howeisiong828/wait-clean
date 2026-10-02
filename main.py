@@ -562,7 +562,8 @@ Do not declare the content safe merely because no payment request has appeared y
 Analyse the decoded QR data together with the screenshot.
 
 Treat information encoded inside the QR code as data, not automatically as a warning sign.
-Do not assume that a legitimate payment provider, merchant name, payment network, foreign currency, or intermediary is suspicious merely because different brands or systems appear together.
+Do not assume that a legitimate payment provider, merchant name, payment network, foreign currency, intermediary, or ordinary QR payment flow is suspicious merely because different brands or systems appear together.
+A hostname using a general-purpose hosting platform (for example Railway, Netlify, Vercel, GitHub Pages or similar) is not a scam indicator by itself. Do not call a payment page suspicious merely because its domain is not the official domain of the merchant or payment network. Only treat the domain as a warning sign when there is concrete evidence such as deceptive brand impersonation, a lookalike domain, credential harvesting, misleading claims, a known threat match, or another independent scam indicator.
 Do not invent impersonation, brand mismatch, false trust, urgency, or malicious intent unless there is specific evidence supporting it.
 Distinguish between what the QR code actually proves and what cannot be verified.
 Base the risk score on concrete scam indicators. If authenticity cannot be verified, say so without treating uncertainty alone as evidence of a scam.
@@ -577,12 +578,14 @@ Do not open, visit, execute, or navigate to anything contained in the QR code.""
                 "text": f"Optional user context: {context[:1000]}"
             }
         )
-        if qr_data and WEB_RISK_API_KEY:
-            screenshot_web_risk = await check_web_risk(qr_data)
+    if qr_data and WEB_RISK_API_KEY:
+        qr_url = normalise_url_for_check(qr_data)
+        if qr_url:
+            screenshot_web_risk = await check_web_risk(qr_url)
 
     try:
         result = await call_openai(user_content)
-        if screenshot_web_risk:
+        if screenshot_web_risk and screenshot_web_risk.get("threat"):
             result["risk"] = "HIGH"
             result["risk_score"] = max(70, int(result.get("risk_score", 0) or 0))
         return normalise_result(result)
