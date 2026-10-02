@@ -209,7 +209,7 @@ async def call_openai(user_content):
 
     if response.status_code >= 400:
         raise RuntimeError(
-            f"AI service returned error {response.status_code}"
+            f"AI service returned error {response.status_code}:{response.text}
         )
 
     data = response.json()
