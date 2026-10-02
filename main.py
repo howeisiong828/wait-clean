@@ -456,6 +456,22 @@ Submitted message:
                     int(result.get("risk_score", 0) or 0)
                 )
 
+            prize_claim = any(
+                phrase in text.lower()
+                for phrase in ["lucky draw", "prize", "winner", "won", "reward"]
+            )
+            sensitive_identity_request = any(
+                phrase in text.lower()
+                for phrase in ["ic number", "nric", "identity card number", "passport number"]
+            )
+
+            if prize_claim and sensitive_identity_request:
+                result["risk"] = "HIGH"
+                result["risk_score"] = max(
+                    75,
+                    int(result.get("risk_score", 0) or 0)
+                )
+
             overseas_job_pattern = (
                 any(p in text.lower() for p in ["interview", "job", "salary"])
                 and any(p in text.lower() for p in ["fly here", "fly to", "travel to", "come to"])
