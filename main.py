@@ -421,7 +421,7 @@ Submitted message:
             result["risk"] = "HIGH"
             result["risk_score"] = max(70, int(result.get("risk_score", 0) or 0))
     
-        if mode == "message":
+        if mode in {"message", "call"}:
             analysis_text = " ".join([
                 str(result.get("summary", "")),
                 " ".join(str(x) for x in result.get("signals", []))
