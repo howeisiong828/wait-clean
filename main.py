@@ -556,8 +556,10 @@ Submitted message:
                 "dear", "love", "handsome", "beautiful", "relationship"
             ])
             if short_relationship and relationship_travel and romantic_context:
-                result["risk"] = "CAUTION"
-                result["risk_score"] = max(40, min(69, int(result.get("risk_score", 0) or 0)))
+                # This is a minimum caution floor, never a cap. Stronger evidence
+                # (for example an advance-payment request) must remain HIGH.
+                current_score = int(result.get("risk_score", 0) or 0)
+                result["risk_score"] = max(40, current_score)
                 result["uncertainty"] = (
                     "The message alone cannot verify the person's identity, intentions or travel arrangements. "
                     "Meeting someone after a short relationship can carry personal-safety risks, so independently "
