@@ -573,7 +573,9 @@ QR and screenshot calibration:
 A QR code used for an ordinary restaurant, retail, loyalty, rewards, membership, check-in, menu or promotion is not suspicious merely because it offers vouchers, free items, points or perks. Those are normal commercial incentives and must not be described as social engineering without another concrete warning sign.
 Do not raise risk because a photo is rotated, angled, cropped, partially obscured, worn, poorly lit, or because branding is upside-down. Image orientation and photographic quality are not scam indicators. Only treat a visual inconsistency as suspicious when it provides concrete evidence of deception or tampering.
 The mere presence of a QR code, or the general fact that QR codes can sometimes lead to phishing, must not increase the risk score. If a QR destination cannot be decoded or verified, state that limitation without treating the uncertainty itself as suspicious.
-For an ordinary real-world loyalty/rewards/promotion QR with no independent scam indicators, use LOW."""   
+For an ordinary real-world loyalty/rewards/promotion QR with no independent scam indicators, use LOW.
+For this class of ordinary QR, do not use CAUTION merely because the destination is unknown, the branding is cropped/rotated/partly obscured, or because free perks/rewards are offered. Do not describe those facts as phishing risk, tampering, reduced trustworthiness, or social engineering unless another concrete warning sign supports that conclusion.
+When the image itself clearly shows an ordinary physical business context (for example a table card, counter sign, receipt, menu, loyalty card or in-store promotion) and there are no independent scam indicators, use LOW. Do not invent that the source is unknown merely because the business identity cannot be independently verified from the image."""   
             }
         )
     if context:
