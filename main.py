@@ -551,6 +551,13 @@ inconsistencies.
 
 Do not assume a logo or professional-looking design proves authenticity.
 Do not declare the content safe merely because no payment request has appeared yet.
+
+Image-only QR calibration (applies even when the QR code cannot be decoded):
+The visible presence of a QR code is not itself a scam indicator. An ordinary physical restaurant, retail, loyalty, rewards, membership, menu, check-in or in-store promotion should normally be LOW when no independent scam indicators are visible.
+Free items, vouchers, points, welcome perks and routine membership enrolment are normal commercial activity; do not describe them as social engineering merely because a QR code is used.
+Do not raise risk because branding is rotated, upside-down, cropped, worn, partially obscured, unclear or photographed at an angle. Those image-quality/orientation issues are not evidence of tampering.
+Do not say an undecoded QR could lead to phishing or malware as a reason to increase risk. If its destination cannot be decoded, put that fact only under what cannot be verified.
+Use CAUTION or HIGH only when the visible material contains an independent warning sign such as deceptive impersonation, a suspicious request for sensitive credentials or identity documents, payment pressure, urgency/threats, or another concrete scam indicator.
 """
         },
         {
@@ -606,41 +613,43 @@ When the image itself clearly shows an ordinary physical business context (for e
         result = await call_openai(user_content)
 
         # Deterministic guardrail for ordinary in-person loyalty/rewards QR cards.
-        # The model sometimes falls back to generic "QR codes can be phishing"
-        # reasoning even when the image shows no concrete scam indicator.
-        if qr_data:
-            combined = " ".join([
-                str(result.get("summary", "")),
-                " ".join(result.get("signals", []) or []),
-                str(result.get("uncertainty", "")),
-            ]).lower()
-            ordinary_rewards = any(term in combined for term in [
-                "rewards program", "rewards programme", "loyalty",
-                "welcome perks", "voucher", "free item", "check-in"
-            ])
-            concrete_high_risk = any(term in combined for term in [
-                "otp", "password", "pin", "banking credential",
-                "card security code", "cvv", "identity document",
-                "ic number", "passport", "known threat", "threat match",
-                "lookalike domain", "credential harvesting"
-            ])
-            if ordinary_rewards and not concrete_high_risk and not (
-                screenshot_web_risk and screenshot_web_risk.get("threat")
-            ):
-                result["risk"] = "LOW"
-                result["risk_score"] = min(20, int(result.get("risk_score", 10) or 10))
-                result["summary"] = (
-                    "This appears to be an ordinary QR-based rewards or loyalty promotion. "
-                    "No concrete scam warning signs are visible in the material provided."
-                )
-                result["signals"] = [
-                    "QR code is presented as part of a normal rewards or loyalty promotion",
-                    "No visible request for passwords, OTPs, banking credentials or identity documents",
-                    "No concrete impersonation, payment-pressure or urgency warning signs are visible",
-                ]
-                result["uncertainty"] = (
-                    "The destination and business ownership cannot be independently verified from the image alone."
-                )
+        # This intentionally works even when OpenCV cannot decode the QR. The vision
+        # model can still identify an ordinary physical rewards card from visible text.
+        combined = " ".join([
+            str(result.get("summary", "")),
+            " ".join(str(x) for x in (result.get("signals", []) or [])),
+            str(result.get("uncertainty", "")),
+        ]).lower()
+        ordinary_rewards = any(term in combined for term in [
+            "rewards program", "rewards programme", "loyalty",
+            "welcome perks", "welcome perk", "voucher", "free item",
+            "check-in", "rewards card", "membership"
+        ])
+        concrete_high_risk = any(term in combined for term in [
+            "request for otp", "asks for otp", "request for password", "asks for password",
+            "request for pin", "asks for pin", "banking credential",
+            "card security code", "cvv", "identity document",
+            "ic number", "nric", "passport number", "known threat",
+            "threat match", "lookalike domain", "credential harvesting",
+            "payment pressure", "urgent payment"
+        ])
+        if ordinary_rewards and not concrete_high_risk and not (
+            screenshot_web_risk and screenshot_web_risk.get("threat")
+        ):
+            result["risk"] = "LOW"
+            result["risk_score"] = min(20, int(result.get("risk_score", 10) or 10))
+            result["summary"] = (
+                "This appears to be an ordinary QR-based rewards or loyalty promotion. "
+                "No concrete scam warning signs are visible in the material provided."
+            )
+            result["signals"] = [
+                "QR code is presented as part of a normal rewards or loyalty promotion",
+                "No visible request for passwords, OTPs, banking credentials or identity documents",
+                "No concrete impersonation, payment-pressure or urgency warning signs are visible",
+            ]
+            result["uncertainty"] = (
+                "If the QR destination could not be decoded, its destination cannot be verified from this image alone."
+            )
 
         if screenshot_web_risk and screenshot_web_risk.get("threat"):
             result["risk"] = "HIGH"
