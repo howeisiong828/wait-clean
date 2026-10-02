@@ -349,7 +349,6 @@ from an unknown person can still be an impersonation setup. Do not raise the ris
 Submitted message:
 {text}
 """
-
 try:
     result = await call_openai(instruction)
 
@@ -392,14 +391,11 @@ try:
                 int(result.get("risk_score", 0) or 0)
             )
 
-    return normalise_result(result)   
-
+    return normalise_result(result)
 except Exception as exc:
         return {
             "error": "We could not complete the AI analysis."
-          
         }
-
 
 @app.post("/analyze-image")
 async def analyze_image(
