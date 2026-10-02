@@ -611,8 +611,8 @@ When the image itself clearly shows an ordinary physical business context (for e
         if qr_data:
             combined = " ".join([
                 str(result.get("summary", "")),
-                " ".join(result.get("warning_signs", []) or []),
-                " ".join(result.get("cannot_verify", []) or []),
+                " ".join(result.get("signals", []) or []),
+                str(result.get("uncertainty", "")),
             ]).lower()
             ordinary_rewards = any(term in combined for term in [
                 "rewards program", "rewards programme", "loyalty",
@@ -633,11 +633,14 @@ When the image itself clearly shows an ordinary physical business context (for e
                     "This appears to be an ordinary QR-based rewards or loyalty promotion. "
                     "No concrete scam warning signs are visible in the material provided."
                 )
-                result["warning_signs"] = [
+                result["signals"] = [
                     "QR code is presented as part of a normal rewards or loyalty promotion",
                     "No visible request for passwords, OTPs, banking credentials or identity documents",
                     "No concrete impersonation, payment-pressure or urgency warning signs are visible",
                 ]
+                result["uncertainty"] = (
+                    "The destination and business ownership cannot be independently verified from the image alone."
+                )
 
         if screenshot_web_risk and screenshot_web_risk.get("threat"):
             result["risk"] = "HIGH"
