@@ -395,6 +395,7 @@ Do not declare the content safe merely because no payment request has appeared y
         user_content.insert(
             1,
             {
+                "type": "text",
                 "text": f"""QR code decoded from the uploaded image: {qr_data}
 
 Analyse the decoded QR data together with the screenshot.
