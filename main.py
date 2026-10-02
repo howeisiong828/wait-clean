@@ -349,54 +349,54 @@ from an unknown person can still be an impersonation setup. Do not raise the ris
 Submitted message:
 {text}
 """
-try:
-    result = await call_openai(instruction)
-
-    if web_risk_result:
-        result["risk"] = "HIGH"
-        result["risk_score"] = max(70, int(result.get("risk_score", 0) or 0))
-
-    if mode == "message":
-        analysis_text = " ".join([
-            str(result.get("summary", "")),
-            " ".join(str(x) for x in result.get("signals", []))
-        ]).lower()
-
-        direct_money_request = any(
-            phrase in text.lower()
-            for phrase in [
-                "transfer me money",
-                "send me money",
-                "send money",
-                "transfer money",
-                "pay for my air ticket",
-                "pay for my flight"
-            ]
-        )
-
-        romance_context = any(
-            phrase in analysis_text
-            for phrase in [
-                "romance",
-                "relationship scam",
-                "romantic",
-                "trust-building"
-            ]
-        )
-
-        if direct_money_request and romance_context:
+    try:
+        result = await call_openai(instruction)
+    
+        if web_risk_result:
             result["risk"] = "HIGH"
-            result["risk_score"] = max(
-                75,
-                int(result.get("risk_score", 0) or 0)
+            result["risk_score"] = max(70, int(result.get("risk_score", 0) or 0))
+    
+        if mode == "message":
+            analysis_text = " ".join([
+                str(result.get("summary", "")),
+                " ".join(str(x) for x in result.get("signals", []))
+            ]).lower()
+    
+            direct_money_request = any(
+                phrase in text.lower()
+                for phrase in [
+                    "transfer me money",
+                    "send me money",
+                    "send money",
+                    "transfer money",
+                    "pay for my air ticket",
+                    "pay for my flight"
+                ]
             )
-
-    return normalise_result(result)
-except Exception as exc:
-        return {
-            "error": "We could not complete the AI analysis."
-        }
-
+    
+            romance_context = any(
+                phrase in analysis_text
+                for phrase in [
+                    "romance",
+                    "relationship scam",
+                    "romantic",
+                    "trust-building"
+                ]
+            )
+    
+            if direct_money_request and romance_context:
+                result["risk"] = "HIGH"
+                result["risk_score"] = max(
+                    75,
+                    int(result.get("risk_score", 0) or 0)
+                )
+    
+        return normalise_result(result)
+    except Exception as exc:
+            return {
+                "error": "We could not complete the AI analysis."
+            }
+    
 @app.post("/analyze-image")
 async def analyze_image(
     file: UploadFile = File(...),
