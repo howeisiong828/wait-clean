@@ -604,6 +604,41 @@ When the image itself clearly shows an ordinary physical business context (for e
 
     try:
         result = await call_openai(user_content)
+
+        # Deterministic guardrail for ordinary in-person loyalty/rewards QR cards.
+        # The model sometimes falls back to generic "QR codes can be phishing"
+        # reasoning even when the image shows no concrete scam indicator.
+        if qr_data:
+            combined = " ".join([
+                str(result.get("summary", "")),
+                " ".join(result.get("warning_signs", []) or []),
+                " ".join(result.get("cannot_verify", []) or []),
+            ]).lower()
+            ordinary_rewards = any(term in combined for term in [
+                "rewards program", "rewards programme", "loyalty",
+                "welcome perks", "voucher", "free item", "check-in"
+            ])
+            concrete_high_risk = any(term in combined for term in [
+                "otp", "password", "pin", "banking credential",
+                "card security code", "cvv", "identity document",
+                "ic number", "passport", "known threat", "threat match",
+                "lookalike domain", "credential harvesting"
+            ])
+            if ordinary_rewards and not concrete_high_risk and not (
+                screenshot_web_risk and screenshot_web_risk.get("threat")
+            ):
+                result["risk"] = "LOW"
+                result["risk_score"] = min(20, int(result.get("risk_score", 10) or 10))
+                result["summary"] = (
+                    "This appears to be an ordinary QR-based rewards or loyalty promotion. "
+                    "No concrete scam warning signs are visible in the material provided."
+                )
+                result["warning_signs"] = [
+                    "QR code is presented as part of a normal rewards or loyalty promotion",
+                    "No visible request for passwords, OTPs, banking credentials or identity documents",
+                    "No concrete impersonation, payment-pressure or urgency warning signs are visible",
+                ]
+
         if screenshot_web_risk and screenshot_web_risk.get("threat"):
             result["risk"] = "HIGH"
             result["risk_score"] = max(70, int(result.get("risk_score", 0) or 0))
