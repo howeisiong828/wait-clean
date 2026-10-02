@@ -678,6 +678,47 @@ Do not describe a legitimate payment intermediary as suspicious simply because i
 
         # Stage 3: deterministic safety fusion. A confirmed URL threat always wins.
         # A no-match never forces LOW; screenshot evidence can still raise risk.
+        # Universal QR/payment calibration: infrastructure uncertainty alone is neutral.
+        # Do not turn a third-party host/provider or inability to verify ownership into CAUTION.
+        # Concrete scam evidence and confirmed threat matches still take precedence.
+        result_text = " ".join([
+            str(result.get("summary", "")),
+            " ".join(str(x) for x in (result.get("signals", []) or [])),
+            str(result.get("uncertainty", "")),
+        ]).lower()
+        payment_qr = bool(qr_data) and any(x in qr_data.upper() for x in [
+            "SG.PAYNOW", "PAYNOW", "ORDER"
+        ])
+        neutral_infra_terms = any(x in result_text for x in [
+            "not an official", "general-purpose hosting", "general purpose hosting",
+            "unfamiliar domain", "cannot be independently verified"
+        ])
+        hard_warning_terms = any(x in result_text for x in [
+            "lookalike domain", "credential harvesting", "asks for otp", "request for otp",
+            "asks for password", "request for password", "asks for pin", "request for pin",
+            "card security code", "cvv", "known threat", "threat match",
+            "payee mismatch", "merchant mismatch", "altered payment",
+            "payment pressure", "urgent payment"
+        ])
+        if payment_qr and neutral_infra_terms and not hard_warning_terms and not (
+            screenshot_web_risk and screenshot_web_risk.get("threat")
+        ):
+            result["risk"] = "LOW"
+            result["risk_score"] = min(20, int(result.get("risk_score", 10) or 10))
+            result["summary"] = (
+                "This appears to be an ordinary QR payment flow with internally consistent "
+                "transaction details and no concrete scam warning signs in the material provided."
+            )
+            result["signals"] = [
+                "The QR contains structured payment or transaction information",
+                "The visible payment details are consistent with the QR transaction context",
+                "A different payment provider or hosting domain is not a scam indicator by itself",
+                "No concrete credential-theft, payment-mismatch, pressure or known-threat signal was detected",
+            ]
+            result["uncertainty"] = (
+                "The screenshot and QR can be checked for warning signs, but they cannot by themselves prove that the merchant or transaction is genuine."
+            )
+
         if screenshot_web_risk and screenshot_web_risk.get("threat"):
             result["risk"] = "HIGH"
             result["risk_score"] = max(70, int(result.get("risk_score", 0) or 0))
