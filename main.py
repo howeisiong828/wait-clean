@@ -531,11 +531,27 @@ request: Request = None,
             "error": "Screenshot is too large. Please use an image under 8 MB."
         }
 
+    # Stage 1: decode the QR first and independently check any decoded web URL.
+    # Never open or navigate to the destination; Web Risk is a reputation lookup only.
     qr_data = decode_qr_from_image(image_bytes)
     print("QR_DECODE_RESULT:", repr(qr_data))
     screenshot_web_risk = None
-    screenshot_url = None
-    
+    qr_url = qr_http_url(qr_data) if qr_data else None
+    if qr_url and WEB_RISK_API_KEY:
+        screenshot_web_risk = await check_web_risk(qr_url)
+
+    qr_security_context = "No decodable web URL was found in the QR code."
+    if qr_url and screenshot_web_risk:
+        status = screenshot_web_risk.get("status")
+        if status == "threat_match":
+            qr_security_context = "The decoded QR URL matched a Google Web Risk threat list. Treat this as a strong independent warning sign."
+        elif status == "checked_no_match":
+            qr_security_context = "The decoded QR URL was checked with Google Web Risk and no current threat-list match was found. This does not prove the URL is legitimate."
+        else:
+            qr_security_context = "The decoded QR URL reputation check was unavailable or inconclusive. Treat that as uncertainty, not as evidence of a scam."
+    elif qr_url:
+        qr_security_context = "A web URL was decoded from the QR, but Web Risk lookup is unavailable. Treat that as uncertainty, not as evidence of a scam."
+
     encoded = base64.b64encode(image_bytes).decode("utf-8")
     mime = file.content_type
 
@@ -574,7 +590,17 @@ Use CAUTION or HIGH only when the visible material contains an independent warni
                 "type": "text",
                 "text": f"""QR code decoded from the uploaded image: {qr_data}
 
-Analyse the decoded QR data together with the screenshot.
+Independent QR security check: {qr_security_context}
+
+Stage 2: Analyse the entire screenshot and combine its visible evidence with the independent QR result above.
+
+Use an evidence hierarchy rather than case-specific brand rules:
+- Strong independent evidence: a Web Risk threat match, credential harvesting, deceptive impersonation/lookalike domain, conflicting or altered payee/payment details, requests for OTP/PIN/password/card security code, coercive payment pressure, or another concrete scam mechanism.
+- Contextual consistency: merchant/payee, amount, order/reference, UEN/payment identifier, transaction purpose, branding and ordinary checkout flow agree with each other. Consistency can reduce unsupported suspicion but does not prove legitimacy.
+- Neutral facts: third-party processors, cloud/hosted domains, different merchant/provider names, QR codes, ordinary payment flows, foreign currency, routine membership/contact details, image rotation/cropping, or inability to independently verify ownership. Neutral facts must not raise the score by themselves.
+- Uncertainty: something cannot be verified. Put it under what cannot be verified; do not convert uncertainty into a warning sign.
+
+Final risk must come from the combined evidence. A clean Web Risk lookup must not cancel concrete screenshot warning signs, and a suspicious-looking screenshot must not override a clean QR result unless the screenshot contains independent concrete evidence.
 
 Treat information encoded inside the QR code as data, not automatically as a warning sign.
 Do not assume that a legitimate payment provider, merchant name, payment network, foreign currency, intermediary, or ordinary QR payment flow is suspicious merely because different brands or systems appear together.
@@ -608,13 +634,6 @@ Do not describe a legitimate payment intermediary as suspicious simply because i
                 "text": f"Optional user context: {context[:1000]}"
             }
         )
-    if qr_data and WEB_RISK_API_KEY:
-        # Only URL QR payloads need a reputation lookup. PayNow/EMV/text QR
-        # payloads are data, not web addresses.
-        qr_url = qr_http_url(qr_data)
-        if qr_url:
-            screenshot_web_risk = await check_web_risk(qr_url)
-
     try:
         result = await call_openai(user_content)
 
@@ -657,6 +676,8 @@ Do not describe a legitimate payment intermediary as suspicious simply because i
                 "If the QR destination could not be decoded, its destination cannot be verified from this image alone."
             )
 
+        # Stage 3: deterministic safety fusion. A confirmed URL threat always wins.
+        # A no-match never forces LOW; screenshot evidence can still raise risk.
         if screenshot_web_risk and screenshot_web_risk.get("threat"):
             result["risk"] = "HIGH"
             result["risk_score"] = max(70, int(result.get("risk_score", 0) or 0))
