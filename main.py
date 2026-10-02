@@ -13,7 +13,24 @@ from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
-app = FastAPI(title="STOP! CHECK! WAIT! Scam Checker")
+app = FastAPI(
+    title="STOP! CHECK! WAIT! Scam Checker",
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+)
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    if request.url.path.startswith("/analyze"):
+        response.headers["Cache-Control"] = "no-store"
+    return response
 rate_limit_store = {}
 RATE_LIMIT = 20
 RATE_WINDOW = 3600
@@ -1739,7 +1756,7 @@ function showError(message) {
         </div>
 
         <div class="uncertainty">
-            ${message}
+            ${escapeHtml(message)}
         </div>
     `;
 
