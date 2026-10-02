@@ -452,6 +452,20 @@ Submitted message:
                     75,
                     int(result.get("risk_score", 0) or 0)
                 )
+
+            overseas_job_pattern = (
+                any(p in text.lower() for p in ["interview", "job", "salary"])
+                and any(p in text.lower() for p in ["fly here", "fly to", "travel to", "come to"])
+                and any(p in analysis_text for p in ["high salary", "unusually high", "high pay"])
+                and any(p in analysis_text for p in ["no verifiable company", "lack of company", "vague", "unverifiable employer"])
+            )
+
+            if overseas_job_pattern:
+                result["risk"] = "HIGH"
+                result["risk_score"] = max(
+                    75,
+                    int(result.get("risk_score", 0) or 0)
+                )
     
         return normalise_result(result)
     except Exception as exc:
