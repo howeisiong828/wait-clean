@@ -154,7 +154,8 @@ Examples include:
 - guaranteed or implausible investment returns combined with solicitation or payment
 - impersonation combined with payment, sensitive-information requests, urgency, threats or pressure
 - remote-access or suspicious app-installation requests
-- job recruitment involving suspicious international travel combined with vague identity, unusually high rewards, pressure or other concrete warning signs
+- job recruitment involving international travel combined with vague employer identity, unusually high rewards, pressure or other concrete warning signs
+- Overseas recruitment calibration: when a message combines travel for an interview or job, missing or unverifiable employer details, and unusually high compensation, normally use HIGH with a score around 75-85. Do not treat the destination or country itself as suspicious. Mention that deceptive overseas recruitment can create serious personal-safety risks, while making clear that the message alone does not establish what the sender intends.
 
 Do not classify something HIGH merely because it involves money, travel, romance, investment, a QR code, or an unfamiliar organisation. Assess the combination and context.
 
