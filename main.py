@@ -372,6 +372,9 @@ A common top-level domain such as .com is NOT suspicious by itself.
 Inability to verify a website from the URL alone is uncertainty, NOT evidence of a scam.
 Do not raise the risk level solely because the domain is unfamiliar, generic, or unverifiable.
 Look for concrete indicators such as deceptive lookalike domains, brand impersonation, misleading subdomains, punycode or homograph tricks, suspicious credential or payment paths, or other clear phishing patterns.
+A brand or service name embedded in a different registrable domain can be a meaningful impersonation signal even when there is no homograph trick. For example, a domain that contains the name of a well-known account, bank, payment, delivery or identity service but is not that service's official domain should not be LOW merely because the URL structure is otherwise simple. Use at least CAUTION when there is a plausible brand-impersonation signal, while stating that the URL alone does not prove malicious intent.
+A Google Web Risk "checked_no_match" result must never cancel or reduce concrete URL-based warning signs. It only means Google returned no current threat-list match.
+Do not expose internal status tokens such as "checked_no_match" or "threat_match" to the user. Describe them naturally, for example "Google Web Risk found no known threat match" or "Google Web Risk flagged this link as a known threat."
 If no meaningful suspicious indicator is present in the URL itself, use LOW while clearly stating that authenticity has not been verified.
 
 Google Web Risk lookup status:
