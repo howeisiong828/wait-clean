@@ -480,19 +480,71 @@ Submitted message:
                     int(result.get("risk_score", 0) or 0)
                 )
 
-            overseas_job_pattern = (
-                any(p in text.lower() for p in ["interview", "job", "salary"])
-                and any(p in text.lower() for p in ["fly here", "fly to", "travel to", "come to"])
-                and any(p in analysis_text for p in ["high salary", "unusually high", "high pay"])
-                and any(p in analysis_text for p in ["no verifiable company", "lack of company", "vague", "unverifiable employer"])
-            )
+            lower_text = text.lower()
 
-            if overseas_job_pattern:
+            # Universal overseas-recruitment calibration. Detect the combination
+            # from the submitted content itself instead of depending on the model
+            # to use particular phrases such as "unusually high salary".
+            job_context = any(p in lower_text for p in [
+                "interview", "job offer", "job", "position", "salary", "employment"
+            ])
+            travel_for_job = any(p in lower_text for p in [
+                "fly here", "fly to", "travel here", "travel to",
+                "come here", "come to", "head office", "headquarters"
+            ])
+            compensation_context = any(p in lower_text for p in [
+                "salary", "sgd", "$", "per month", "monthly pay"
+            ])
+            thin_employer_context = not any(p in lower_text for p in [
+                "company website", "official website", "company email",
+                "hr@", "registration number", "uen"
+            ])
+
+            if job_context and travel_for_job and compensation_context and thin_employer_context:
                 result["risk"] = "HIGH"
-                result["risk_score"] = max(
-                    75,
-                    int(result.get("risk_score", 0) or 0)
+                result["risk_score"] = max(75, int(result.get("risk_score", 0) or 0))
+                result["uncertainty"] = (
+                    "The message alone cannot establish whether the employer or travel arrangement is genuine. "
+                    "Deceptive overseas recruitment can create financial and personal-safety risks, including "
+                    "coercion or trafficking, so verify the employer and arrangements independently before travelling."
                 )
+
+            # Universal relationship/travel calibration. Travel invitations from a
+            # person the message itself says was only recently known deserve caution,
+            # without treating romance or the destination as inherently suspicious.
+            short_relationship = any(p in lower_text for p in [
+                "just met", "met for a few weeks", "known you for a few weeks",
+                "known each other for a few weeks", "only known you"
+            ])
+            relationship_travel = any(p in lower_text for p in [
+                "come to", "visit me", "fly to", "travel to", "meet me"
+            ])
+            romantic_context = any(p in lower_text for p in [
+                "dear", "love", "handsome", "beautiful", "relationship"
+            ])
+            if short_relationship and relationship_travel and romantic_context:
+                result["risk"] = "CAUTION"
+                result["risk_score"] = max(40, min(69, int(result.get("risk_score", 0) or 0)))
+                result["uncertainty"] = (
+                    "The message alone cannot verify the person's identity, intentions or travel arrangements. "
+                    "Meeting someone after a short relationship can carry personal-safety risks, so independently "
+                    "verify the person and arrangements and keep control of your own travel, accommodation and documents."
+                )
+
+            # Sensitive financial/identity information requested in a claimed
+            # membership, prize, bank or organisation context should not stay LOW.
+            financial_info_request = any(p in lower_text for p in [
+                "bank account", "account number", "bank details",
+                "sufficient funds", "available funds", "credit card number",
+                "debit card number"
+            ])
+            organisation_context = any(p in lower_text for p in [
+                "membership", "member", "ntuc", "bank", "organisation", "organization",
+                "lucky draw", "prize", "winner"
+            ])
+            if financial_info_request and organisation_context:
+                result["risk"] = "HIGH"
+                result["risk_score"] = max(75, int(result.get("risk_score", 0) or 0))
     
         return normalise_result(result)
     except Exception as exc:
