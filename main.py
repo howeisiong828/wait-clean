@@ -6,6 +6,7 @@ import time
 import cv2
 import numpy as np
 from typing import Optional
+from urllib.parse import urlparse
 
 import httpx
 from fastapi import FastAPI, UploadFile, File, Form, Request
@@ -197,18 +198,39 @@ def extract_json(text: str):
         raise ValueError("AI response was not valid JSON")
 
 
+def normalise_url_for_check(value: str):
+    value = value.strip()
+    if not re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*://", value):
+        value = "https://" + value
+    parsed = urlparse(value)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return None
+    return value
+
+
 async def check_web_risk(url: str):
-    endpoint = f"https://webrisk.googleapis.com/v1/uris:search?threatTypes=MALWARE&threatTypes=SOCIAL_ENGINEERING&threatTypes=UNWANTED_SOFTWARE&uri={url}&key={WEB_RISK_API_KEY}"
+    checked_url = normalise_url_for_check(url)
+    if not checked_url or not WEB_RISK_API_KEY:
+        return None
+
+    endpoint = "https://webrisk.googleapis.com/v1/uris:search"
+    params = [
+        ("threatTypes", "MALWARE"),
+        ("threatTypes", "SOCIAL_ENGINEERING"),
+        ("threatTypes", "UNWANTED_SOFTWARE"),
+        ("uri", checked_url),
+        ("key", WEB_RISK_API_KEY),
+    ]
 
     async with httpx.AsyncClient(timeout=10) as client:
-        response = await client.get(endpoint)
-       
+        response = await client.get(endpoint, params=params)
 
-        if response.status_code != 200:
-             return None
+    if response.status_code != 200:
+        print("WEB_RISK_ERROR:", response.status_code, response.text[:500])
+        return None
 
-        data = response.json()
-        return data.get("threat")
+    data = response.json()
+    return data.get("threat")
 async def call_openai(user_content):
     if not OPENAI_API_KEY:
         raise RuntimeError("AI analysis is not configured.")
@@ -306,8 +328,13 @@ async def analyze(req: TextRequest, request: Request):
     mode = req.mode if req.mode in {"message", "link"} else "message"
 
     web_risk_result = None
-    if mode == "link" and WEB_RISK_API_KEY:
-        web_risk_result = await check_web_risk(text)
+    checked_url = None
+    if mode == "link":
+        checked_url = normalise_url_for_check(text)
+        if not checked_url:
+            return {"error": "Please enter a valid http or https link."}
+        if WEB_RISK_API_KEY:
+            web_risk_result = await check_web_risk(checked_url)
   
     if mode == "link":
         instruction = f"""
@@ -325,7 +352,7 @@ Look for concrete indicators such as deceptive lookalike domains, brand imperson
 If no meaningful suspicious indicator is present in the URL itself, use LOW while clearly stating that authenticity has not been verified.
 
 Submitted link:
-{text}
+{checked_url}
 """
     elif mode == "call":
         instruction = f"""
