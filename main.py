@@ -394,7 +394,7 @@ try:
 
     return normalise_result(result)   
 
-    except Exception as exc:
+except Exception as exc:
         return {
             "error": "We could not complete the AI analysis."
           
