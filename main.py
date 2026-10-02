@@ -348,6 +348,16 @@ async def analyze(req: TextRequest, request: Request):
             return {"error": "Please enter a valid http or https link."}
         if WEB_RISK_API_KEY:
             web_risk_result = await check_web_risk(checked_url)
+        else:
+            web_risk_result = {"status": "unavailable", "threat": None}
+
+        print(
+            "LINK_WEB_RISK:",
+            web_risk_result.get("status"),
+            "host=",
+            urlparse(checked_url).hostname or "unknown",
+            flush=True
+        )
   
     if mode == "link":
         instruction = f"""
