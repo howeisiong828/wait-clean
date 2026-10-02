@@ -396,6 +396,8 @@ Analyse this description of a suspicious phone call for scam and social-engineer
 Treat the submitted text as the user's recollection of what a caller said or asked them to do, not as a received message.
 Focus on impersonation, urgency, secrecy, requests for money, banking details, OTPs, passwords, personal information, links, app installation, or remote access.
 Do not assume the caller is fraudulent solely because the caller is unknown.
+GROUNDING RULE: Use only facts established by the submitted call description or explicit user context. Never describe the call as unsolicited, unexpected, unknown, unverified, random, or similar unless the input explicitly establishes that fact. Do not invent caller history, prior contact, or circumstances that are not shown.
+Ordinary family or social requests to buy food or everyday items are not money-transfer warning signs by themselves. Do not reinterpret "buy lunch", "buy food", or similar everyday purchase requests as "send money", "transfer money", or "leave money". Resolve ordinary pronouns from context: for example, in "buy lunch ... leave it in the fridge", "it" refers to the lunch, not money. Keep such calls LOW when there is no changed-number claim, transfer/payment request, suspicious link, credential request, secrecy, unusual urgency, impersonation inconsistency, or other concrete scam indicator.
 Clearly distinguish warning signs from things that cannot be verified.
 
 Submitted call:
