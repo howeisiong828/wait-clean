@@ -210,8 +210,10 @@ def normalise_url_for_check(value: str):
 
 async def check_web_risk(url: str):
     checked_url = normalise_url_for_check(url)
-    if not checked_url or not WEB_RISK_API_KEY:
-        return None
+    if not checked_url:
+        return {"status": "invalid", "threat": None}
+    if not WEB_RISK_API_KEY:
+        return {"status": "unavailable", "threat": None}
 
     endpoint = "https://webrisk.googleapis.com/v1/uris:search"
     params = [
@@ -222,15 +224,26 @@ async def check_web_risk(url: str):
         ("key", WEB_RISK_API_KEY),
     ]
 
-    async with httpx.AsyncClient(timeout=10) as client:
-        response = await client.get(endpoint, params=params)
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(endpoint, params=params)
 
-    if response.status_code != 200:
-        print("WEB_RISK_ERROR:", response.status_code, response.text[:500])
-        return None
+        if response.status_code != 200:
+            print("WEB_RISK_ERROR:", response.status_code, response.text[:500])
+            return {"status": "error", "threat": None}
 
-    data = response.json()
-    return data.get("threat")
+        data = response.json()
+        threat = data.get("threat")
+        if threat:
+            print("WEB_RISK_STATUS: threat_match")
+            return {"status": "threat_match", "threat": threat}
+
+        print("WEB_RISK_STATUS: checked_no_match")
+        return {"status": "checked_no_match", "threat": None}
+
+    except Exception as exc:
+        print("WEB_RISK_ERROR:", repr(exc))
+        return {"status": "error", "threat": None}
 async def call_openai(user_content):
     if not OPENAI_API_KEY:
         raise RuntimeError("AI analysis is not configured.")
@@ -351,6 +364,14 @@ Do not raise the risk level solely because the domain is unfamiliar, generic, or
 Look for concrete indicators such as deceptive lookalike domains, brand impersonation, misleading subdomains, punycode or homograph tricks, suspicious credential or payment paths, or other clear phishing patterns.
 If no meaningful suspicious indicator is present in the URL itself, use LOW while clearly stating that authenticity has not been verified.
 
+Google Web Risk lookup status:
+{web_risk_result.get("status") if web_risk_result else "unavailable"}
+
+Interpret this status carefully:
+- "threat_match" means Google Web Risk returned a threat-list match and is a strong warning signal.
+- "checked_no_match" means the URL was checked and no match was returned; this does NOT prove the site is safe.
+- "error" or "unavailable" means the reputation lookup could not be relied on; treat that as uncertainty, not as evidence that the link is malicious.
+
 Submitted link:
 {checked_url}
 """
@@ -379,7 +400,7 @@ Submitted message:
     try:
         result = await call_openai(instruction)
     
-        if web_risk_result:
+        if web_risk_result and web_risk_result.get("threat"):
             result["risk"] = "HIGH"
             result["risk_score"] = max(70, int(result.get("risk_score", 0) or 0))
     
