@@ -566,19 +566,28 @@ Submitted message:
                     "verify the person and arrangements and keep control of your own travel, accommodation and documents."
                 )
 
-            # Sensitive financial/identity information requested in a claimed
-            # membership, prize, bank or organisation context should not stay LOW.
-            financial_info_request = any(p in lower_text for p in [
+            # Sensitive financial details become a strong warning when the
+            # sender actually asks the user to provide/confirm/share them. Mere
+            # mention of an account or available funds in a normal notification
+            # must not trigger HIGH by itself.
+            financial_terms = [
                 "bank account", "account number", "bank details",
                 "sufficient funds", "available funds", "credit card number",
                 "debit card number"
-            ])
+            ]
+            request_verbs = [
+                "provide", "send", "share", "reply with", "confirm",
+                "give us", "tell us", "submit", "enter"
+            ]
+            financial_info_request = (
+                any(term in lower_text for term in financial_terms)
+                and any(verb in lower_text for verb in request_verbs)
+            )
             organisation_context = any(p in lower_text for p in [
                 "membership", "member", "ntuc", "bank", "organisation", "organization",
                 "lucky draw", "prize", "winner"
             ])
             if financial_info_request and organisation_context:
-                result["risk"] = "HIGH"
                 result["risk_score"] = max(75, int(result.get("risk_score", 0) or 0))
     
         return normalise_result(result)
