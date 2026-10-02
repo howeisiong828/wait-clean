@@ -693,12 +693,15 @@ Do not describe a legitimate payment intermediary as suspicious simply because i
             "not an official", "general-purpose hosting", "general purpose hosting",
             "unfamiliar domain", "cannot be independently verified"
         ])
+        # Only count a hard warning when the analysis states concrete evidence.
+        # Do not trigger on negated phrases such as "no credential harvesting",
+        # "no altered payment details" or speculative "could be phishing".
         hard_warning_terms = any(x in result_text for x in [
-            "lookalike domain", "credential harvesting", "asks for otp", "request for otp",
-            "asks for password", "request for password", "asks for pin", "request for pin",
-            "card security code", "cvv", "known threat", "threat match",
-            "payee mismatch", "merchant mismatch", "altered payment",
-            "payment pressure", "urgent payment"
+            "lookalike domain detected", "credential harvesting detected",
+            "asks for otp", "request for otp", "asks for password", "request for password",
+            "asks for pin", "request for pin", "asks for cvv", "request for cvv",
+            "known threat match", "payee does not match", "merchant does not match",
+            "payment details were altered", "pressures you to pay", "urgent payment required"
         ])
         if payment_qr and neutral_infra_terms and not hard_warning_terms and not (
             screenshot_web_risk and screenshot_web_risk.get("threat")
