@@ -406,7 +406,7 @@ Submitted call:
 Analyse this message for scam and social-engineering risk.
 
 Pay attention to the stage of the conversation. An apparently friendly opening
-from an unknown person can still be an impersonation setup. Do not raise the risk level merely because a message is unsolicited or its sender cannot be independently verified. If there is no suspicious link, payment request, request for credentials or OTP, impersonation inconsistency, threat, unusual urgency, or other concrete scam indicator, use LOW risk and clearly state that authenticity cannot be confirmed from the message alone.
+from an unknown person can still be an impersonation setup. Do not assume contact is unsolicited, unexpected, or from an unknown person unless the submitted content or user context establishes that. Do not invent sender history or circumstances. Do not raise risk merely because a sender cannot be independently verified. An invitation to join an investment, stock-tip, portfolio-advice or trading group through WhatsApp, Telegram or a similar external group is a meaningful early-stage investment-scam warning sign even before money, credentials or urgency appear; use at least CAUTION when the submitted content itself establishes that combination. Otherwise, if there is no suspicious link, payment request, request for credentials or OTP, impersonation inconsistency, threat, unusual urgency, or other concrete scam indicator, use LOW risk and clearly state that authenticity cannot be confirmed from the message alone.
 
 Submitted message:
 {text}
