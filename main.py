@@ -567,7 +567,13 @@ A hostname using a general-purpose hosting platform (for example Railway, Netlif
 Do not invent impersonation, brand mismatch, false trust, urgency, or malicious intent unless there is specific evidence supporting it.
 Distinguish between what the QR code actually proves and what cannot be verified.
 Base the risk score on concrete scam indicators. If authenticity cannot be verified, say so without treating uncertainty alone as evidence of a scam.
-Do not open, visit, execute, or navigate to anything contained in the QR code."""   
+Do not open, visit, execute, or navigate to anything contained in the QR code.
+
+QR and screenshot calibration:
+A QR code used for an ordinary restaurant, retail, loyalty, rewards, membership, check-in, menu or promotion is not suspicious merely because it offers vouchers, free items, points or perks. Those are normal commercial incentives and must not be described as social engineering without another concrete warning sign.
+Do not raise risk because a photo is rotated, angled, cropped, partially obscured, worn, poorly lit, or because branding is upside-down. Image orientation and photographic quality are not scam indicators. Only treat a visual inconsistency as suspicious when it provides concrete evidence of deception or tampering.
+The mere presence of a QR code, or the general fact that QR codes can sometimes lead to phishing, must not increase the risk score. If a QR destination cannot be decoded or verified, state that limitation without treating the uncertainty itself as suspicious.
+For an ordinary real-world loyalty/rewards/promotion QR with no independent scam indicators, use LOW."""   
             }
         )
     if context:
