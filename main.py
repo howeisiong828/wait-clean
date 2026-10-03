@@ -595,9 +595,12 @@ request: Request = None,
             "error": "Please upload a JPG, PNG or WEBP screenshot."
         }
 
-    image_bytes = await file.read()
+    max_image_bytes = 8 * 1024 * 1024
+    # Read only one byte beyond the limit so oversized uploads are rejected
+    # without loading the full file into application memory.
+    image_bytes = await file.read(max_image_bytes + 1)
 
-    if len(image_bytes) > 8 * 1024 * 1024:
+    if len(image_bytes) > max_image_bytes:
         return {
             "error": "Screenshot is too large. Please use an image under 8 MB."
         }
