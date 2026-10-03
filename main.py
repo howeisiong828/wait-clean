@@ -150,8 +150,10 @@ Before choosing a score, reason from these general evidence dimensions when they
 - transaction_consistency: consistent, unknown, or conflicting payee/merchant/payment details
 - technical_evidence: known threat match, deceptive/lookalike URL, credential harvesting, or none
 - relationship_stage: established/ordinary, unknown, or newly established/rapid trust-building
+- personal_safety_exposure: whether the requested action would move the user from a remote conversation into a materially more vulnerable real-world situation, such as travelling to meet a recently known or primarily online contact, surrendering control of transport/accommodation/documents, or becoming dependent on that contact in an unfamiliar setting
 
-Use combinations rather than isolated terms. A normal notification that merely mentions an account, salary, funds, identity document, travel, QR code or payment is not suspicious by itself. Distinguish MENTION from REQUEST: only treat sensitive data or money as requested when the sender is asking the recipient to disclose, send, transfer, enter, confirm, or otherwise provide it.
+Use combinations rather than isolated terms.
+Personal-safety exposure is itself meaningful evidence even when no money, credential or suspicious link is requested. When the submitted content establishes a newly formed or rapidly intensified relationship AND asks the user to travel or place themselves in a materially dependent/vulnerable in-person situation, normally use at least CAUTION. This is not because romance, travel, a destination, or a new relationship is inherently suspicious; it is because the combination increases real-world safety exposure while identity and intentions remain uncertain. Keep ordinary established social visits LOW when that combination is absent. A normal notification that merely mentions an account, salary, funds, identity document, travel, QR code or payment is not suspicious by itself. Distinguish MENTION from REQUEST: only treat sensitive data or money as requested when the sender is asking the recipient to disclose, send, transfer, enter, confirm, or otherwise provide it.
 
 Risk must be monotonic: adding a stronger established warning signal must never lower the score. A calibration rule may set a minimum risk floor, but must never cap or reduce a higher risk that is supported by stronger evidence.
 
@@ -174,6 +176,7 @@ CAUTION:
 Use CAUTION when there are meaningful warning signs but the evidence is not strong enough for HIGH.
 
 Examples include:
+- a newly formed or rapidly intensified relationship combined with travel or another materially vulnerable in-person meeting arrangement, even when no money has yet been requested
 - unsolicited investment, stock-tip or portfolio-consultation approaches
 - attempts to move someone into an investment WhatsApp, Telegram or similar group
 - unsolicited romantic approaches that show possible trust-building or grooming
