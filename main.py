@@ -45,9 +45,11 @@ def check_rate_limit(client_id: str):
     rate_limit_store[client_id] = requests
     return True
 def get_client_id(request: Request):
-    forwarded_for = request.headers.get("x-forwarded-for", "")
-    if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
+    # Railway's public edge supplies X-Real-IP with the remote client's address.
+    # Do not trust client-controlled X-Forwarded-For for rate limiting.
+    real_ip = request.headers.get("x-real-ip", "").strip()
+    if real_ip:
+        return real_ip
 
     return request.client.host if request.client else "unknown"      
 def decode_qr_from_image(image_bytes: bytes):
