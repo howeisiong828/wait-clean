@@ -246,12 +246,31 @@ def extract_json(text: str):
 
 
 def normalise_url_for_check(value: str):
-    value = value.strip()
+    value = (value or "").strip()
+
+    # Bound URL input before parsing or sending it to third-party services.
+    if not value or len(value) > 4096 or any(ch in value for ch in ("\\r", "\\n", "\\x00")):
+        return None
+
     if not re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*://", value):
         value = "https://" + value
-    parsed = urlparse(value)
-    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+
+    try:
+        parsed = urlparse(value)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            return None
+        if parsed.username is not None or parsed.password is not None:
+            return None
+        hostname = parsed.hostname
+        if not hostname or len(hostname) > 253:
+            return None
+        if any(len(label) > 63 for label in hostname.rstrip(".").split(".")):
+            return None
+        # Accessing .port validates malformed/out-of-range ports.
+        _ = parsed.port
+    except (ValueError, UnicodeError):
         return None
+
     return value
 
 
