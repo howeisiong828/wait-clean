@@ -388,12 +388,23 @@ async def call_openai(user_content):
     return extract_json(content)
 
 
+def safe_risk_score(value, default=50):
+    """Parse model-provided scores safely; malformed output must never become LOW by accident."""
+    try:
+        if isinstance(value, bool):
+            raise ValueError
+        score = int(float(value))
+        return max(0, min(100, score))
+    except (TypeError, ValueError, OverflowError):
+        return default
+
+
 def normalise_result(result):
     risk = str(result.get("risk", "CAUTION")).upper()
 
     if risk not in {"LOW", "CAUTION", "HIGH"}:
         risk = "CAUTION"
-    risk_score = max(0, min(100, int(result.get("risk_score", 0) or 0)))
+    risk_score = safe_risk_score(result.get("risk_score"), default=50)
 
     # Enforce the published bands deterministically so the label and score can
     # never contradict each other, regardless of model output.
@@ -547,7 +558,7 @@ Submitted message:
     
         if web_risk_result and web_risk_result.get("threat"):
             result["risk"] = "HIGH"
-            result["risk_score"] = max(70, int(result.get("risk_score", 0) or 0))
+            result["risk_score"] = max(70, safe_risk_score(result.get("risk_score"), default=70))
     
         # Universal semantic scoring is handled by the model using the evidence
         # framework in SYSTEM_PROMPT. Keep deterministic overrides only for
@@ -723,7 +734,7 @@ Do not describe a legitimate payment intermediary as suspicious simply because i
         # risk here; this avoids an attacker gaming a LOW override with crafted text.
         if screenshot_web_risk and screenshot_web_risk.get("threat"):
             result["risk"] = "HIGH"
-            result["risk_score"] = max(70, int(result.get("risk_score", 0) or 0))
+            result["risk_score"] = max(70, safe_risk_score(result.get("risk_score"), default=70))
         return normalise_result(result)
 
     except Exception as exc:
