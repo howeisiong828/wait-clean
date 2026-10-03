@@ -579,6 +579,13 @@ inconsistencies.
 Do not assume a logo or professional-looking design proves authenticity.
 Do not declare the content safe merely because no payment request has appeared yet.
 
+Visible-link calibration:
+A visible URL on a general-purpose hosting platform (for example Netlify, Railway, Vercel, GitHub Pages or similar) is a neutral hosting fact, not a scam indicator by itself.
+Do not raise risk merely because a visible link uses a generic, unfamiliar, temporary-looking, or third-party hosted domain, or because it leads to an order form.
+Only treat the visible URL as a warning sign when there is concrete evidence such as a deceptive lookalike domain, false brand impersonation, credential harvesting, payment deception, a known threat match, or another independent scam mechanism.
+If the visible URL cannot be independently reputation-checked from the screenshot, state that as uncertainty rather than using it to increase the score.
+An ordinary social-media post, retail/order form, menu, promotion or small-business hosted page with no independent scam indicators should normally remain LOW.
+
 Image-only QR calibration (applies even when the QR code cannot be decoded):
 The visible presence of a QR code is not itself a scam indicator. An ordinary physical restaurant, retail, loyalty, rewards, membership, menu, check-in or in-store promotion should normally be LOW when no independent scam indicators are visible.
 Free items, vouchers, points, welcome perks and routine membership enrolment are normal commercial activity; do not describe them as social engineering merely because a QR code is used.
