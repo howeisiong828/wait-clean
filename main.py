@@ -6,6 +6,8 @@ import time
 import cv2
 import numpy as np
 from typing import Optional
+from PIL import Image, UnidentifiedImageError
+import io
 from urllib.parse import urlparse
 
 import httpx
@@ -526,6 +528,20 @@ request: Request = None,
         return {
             "error": "Screenshot is too large. Please use an image under 8 MB."
         }
+
+    # Validate the actual decoded image, not only the client-supplied MIME type.
+    # This also blocks compressed image/decompression-bomb style uploads from
+    # consuming excessive memory before QR/vision processing.
+    try:
+        with Image.open(io.BytesIO(image_bytes)) as image:
+            if image.format not in {"JPEG", "PNG", "WEBP"}:
+                return {"error": "Please upload a valid JPG, PNG or WEBP screenshot."}
+            width, height = image.size
+            if width < 1 or height < 1 or width * height > 25_000_000:
+                return {"error": "Screenshot dimensions are too large. Please use a smaller image."}
+            image.verify()
+    except (UnidentifiedImageError, OSError, ValueError):
+        return {"error": "Please upload a valid JPG, PNG or WEBP screenshot."}
 
     # Stage 1: decode the QR first and independently check any decoded web URL.
     # Never open or navigate to the destination; Web Risk is a reputation lookup only.
