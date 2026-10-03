@@ -1298,7 +1298,7 @@ View last 10 checks
 
 <section class="safety">
 
-<p><strong>Your privacy matters.</strong> We don't intentionally store what you submit on our servers after processing. Some information is securely processed by third-party services to perform your check.</p>
+<p><strong>Your privacy matters.</strong> We don't store what you submit on our servers after processing. Some information is securely processed by third-party services to perform your check.</p>
 <p><a href="/privacy" style="color:#17467d;font-weight:700;">Learn more in our Privacy Policy</a></p>
 
 <strong>STOP. CHECK. WAIT.</strong>
