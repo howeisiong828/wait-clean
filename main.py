@@ -1298,6 +1298,8 @@ View last 10 checks
 
 <section class="safety">
 
+<p><strong>Your privacy matters.</strong> We don't intentionally store the messages, call descriptions, links, screenshots or QR contents you submit on our servers after processing. A limited history of recent checks may be kept locally on your device. Information needed to perform a check may be securely processed by third-party services, including OpenAI and Google Web Risk, under their respective data practices.</p>
+
 <strong>STOP. CHECK. WAIT.</strong>
 
 <p>
