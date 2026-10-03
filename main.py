@@ -303,7 +303,8 @@ async def check_web_risk(url: str):
             response = await client.get(endpoint, params=params)
 
         if response.status_code != 200:
-            print("WEB_RISK_ERROR:", response.status_code, response.text[:500])
+            # Keep diagnostics without logging provider response bodies.
+            print("WEB_RISK_ERROR: HTTP", response.status_code)
             return {"status": "error", "threat": None}
 
         data = response.json()
@@ -316,7 +317,8 @@ async def check_web_risk(url: str):
         return {"status": "checked_no_match", "threat": None}
 
     except Exception as exc:
-        print("WEB_RISK_ERROR:", repr(exc))
+        # Exception text may contain the request URL (including the API key).
+        print("WEB_RISK_ERROR: exception", type(exc).__name__)
         return {"status": "error", "threat": None}
 async def call_openai(user_content):
     if not OPENAI_API_KEY:
