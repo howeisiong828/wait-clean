@@ -222,10 +222,7 @@ class TextRequest(BaseModel):
 
 @app.get("/health")
 def health():
-    return {
-        "status": "healthy",
-        "ai_configured": bool(OPENAI_API_KEY)
-    }
+    return {"status": "healthy"}
 
 
 def extract_json(text: str):
