@@ -531,7 +531,6 @@ request: Request = None,
     # Stage 1: decode the QR first and independently check any decoded web URL.
     # Never open or navigate to the destination; Web Risk is a reputation lookup only.
     qr_data = decode_qr_from_image(image_bytes)
-    print("QR_DECODE_RESULT:", repr(qr_data))
     screenshot_web_risk = None
     qr_url = qr_http_url(qr_data) if qr_data else None
     if qr_url and WEB_RISK_API_KEY:
