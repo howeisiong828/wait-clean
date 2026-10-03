@@ -139,6 +139,24 @@ Return ONLY valid JSON using this exact structure:
   "language": "detected language"
 }
 
+Universal evidence model:
+Judge behaviours and relationships between facts, not exact wording, brand names, countries, currencies, or memorised scam scripts. Semantically equivalent wording in any language must be treated equivalently.
+
+Before choosing a score, reason from these general evidence dimensions when they are actually established by the submitted content:
+- requested_action: none, ordinary action, travel/meeting, payment/transfer, sensitive-information disclosure, authentication credential, app install/remote access
+- claimed_context: ordinary social/commercial, relationship/trust-building, recruitment/job, prize/reward, investment/financial, authority/impersonation, delivery/account support
+- pressure: none, normal scheduling, urgency, threat, secrecy or coercion
+- verification_quality: concrete independent verification route, limited identity detail, or contradictory/deceptive identity evidence
+- transaction_consistency: consistent, unknown, or conflicting payee/merchant/payment details
+- technical_evidence: known threat match, deceptive/lookalike URL, credential harvesting, or none
+- relationship_stage: established/ordinary, unknown, or newly established/rapid trust-building
+
+Use combinations rather than isolated terms. A normal notification that merely mentions an account, salary, funds, identity document, travel, QR code or payment is not suspicious by itself. Distinguish MENTION from REQUEST: only treat sensitive data or money as requested when the sender is asking the recipient to disclose, send, transfer, enter, confirm, or otherwise provide it.
+
+Risk must be monotonic: adding a stronger established warning signal must never lower the score. A calibration rule may set a minimum risk floor, but must never cap or reduce a higher risk that is supported by stronger evidence.
+
+Do not make a benign result suspicious merely because authenticity cannot be independently proven from the submitted material. Put unverifiable facts under uncertainty unless there is concrete contradictory or deceptive evidence.
+
 URL calibration:
 For links, an unfamiliar domain, a domain without a recognisable brand name, a common TLD such as .com, or inability to verify the destination from the URL alone are NOT scam indicators by themselves. Do not assign CAUTION solely for these reasons. If the URL has no concrete suspicious indicators, classify it LOW while stating that authenticity has not been verified. Raise risk only for concrete signals such as deceptive lookalike domains, impersonation, misleading subdomains, punycode/homograph tricks, suspicious credential/payment paths, or other clear phishing patterns.
 
@@ -462,134 +480,11 @@ Submitted message:
             result["risk"] = "HIGH"
             result["risk_score"] = max(70, int(result.get("risk_score", 0) or 0))
     
-        if mode in {"message", "call"}:
-            analysis_text = " ".join([
-                str(result.get("summary", "")),
-                " ".join(str(x) for x in result.get("signals", []))
-            ]).lower()
-    
-            direct_money_request = any(
-                phrase in text.lower()
-                for phrase in [
-                    "transfer me money",
-                    "send me money",
-                    "send money",
-                    "transfer money",
-                    "pay for my air ticket",
-                    "pay for my flight"
-                ]
-            )
-    
-            romance_context = any(
-                phrase in analysis_text
-                for phrase in [
-                    "romance",
-                    "relationship scam",
-                    "romantic",
-                    "trust-building"
-                ]
-            )
-    
-            if direct_money_request and romance_context:
-                result["risk"] = "HIGH"
-                result["risk_score"] = max(
-                    75,
-                    int(result.get("risk_score", 0) or 0)
-                )
-
-            prize_claim = any(
-                phrase in text.lower()
-                for phrase in ["lucky draw", "prize", "winner", "won", "reward"]
-            )
-            sensitive_identity_request = any(
-                phrase in text.lower()
-                for phrase in ["ic number", "nric", "identity card number", "passport number"]
-            )
-
-            if prize_claim and sensitive_identity_request:
-                result["risk"] = "HIGH"
-                result["risk_score"] = max(
-                    75,
-                    int(result.get("risk_score", 0) or 0)
-                )
-
-            lower_text = text.lower()
-
-            # Universal overseas-recruitment calibration. Detect the combination
-            # from the submitted content itself instead of depending on the model
-            # to use particular phrases such as "unusually high salary".
-            job_context = any(p in lower_text for p in [
-                "interview", "job offer", "job", "position", "salary", "employment"
-            ])
-            travel_for_job = any(p in lower_text for p in [
-                "fly here", "fly to", "travel here", "travel to",
-                "come here", "come to", "head office", "headquarters"
-            ])
-            compensation_context = any(p in lower_text for p in [
-                "salary", "sgd", "$", "per month", "monthly pay"
-            ])
-            thin_employer_context = not any(p in lower_text for p in [
-                "company website", "official website", "company email",
-                "hr@", "registration number", "uen"
-            ])
-
-            if job_context and travel_for_job and compensation_context and thin_employer_context:
-                result["risk"] = "HIGH"
-                result["risk_score"] = max(75, int(result.get("risk_score", 0) or 0))
-                result["uncertainty"] = (
-                    "The message alone cannot establish whether the employer or travel arrangement is genuine. "
-                    "Deceptive overseas recruitment can create financial and personal-safety risks, including "
-                    "coercion or trafficking, so verify the employer and arrangements independently before travelling."
-                )
-
-            # Universal relationship/travel calibration. Travel invitations from a
-            # person the message itself says was only recently known deserve caution,
-            # without treating romance or the destination as inherently suspicious.
-            short_relationship = any(p in lower_text for p in [
-                "just met", "met for a few weeks", "known you for a few weeks",
-                "known each other for a few weeks", "only known you"
-            ])
-            relationship_travel = any(p in lower_text for p in [
-                "come to", "visit me", "fly to", "travel to", "meet me"
-            ])
-            romantic_context = any(p in lower_text for p in [
-                "dear", "love", "handsome", "beautiful", "relationship"
-            ])
-            if short_relationship and relationship_travel and romantic_context:
-                # This is a minimum caution floor, never a cap. Stronger evidence
-                # (for example an advance-payment request) must remain HIGH.
-                current_score = int(result.get("risk_score", 0) or 0)
-                result["risk_score"] = max(40, current_score)
-                result["uncertainty"] = (
-                    "The message alone cannot verify the person's identity, intentions or travel arrangements. "
-                    "Meeting someone after a short relationship can carry personal-safety risks, so independently "
-                    "verify the person and arrangements and keep control of your own travel, accommodation and documents."
-                )
-
-            # Sensitive financial details become a strong warning when the
-            # sender actually asks the user to provide/confirm/share them. Mere
-            # mention of an account or available funds in a normal notification
-            # must not trigger HIGH by itself.
-            financial_terms = [
-                "bank account", "account number", "bank details",
-                "sufficient funds", "available funds", "credit card number",
-                "debit card number"
-            ]
-            request_verbs = [
-                "provide", "send", "share", "reply with", "confirm",
-                "give us", "tell us", "submit", "enter"
-            ]
-            financial_info_request = (
-                any(term in lower_text for term in financial_terms)
-                and any(verb in lower_text for verb in request_verbs)
-            )
-            organisation_context = any(p in lower_text for p in [
-                "membership", "member", "ntuc", "bank", "organisation", "organization",
-                "lucky draw", "prize", "winner"
-            ])
-            if financial_info_request and organisation_context:
-                result["risk_score"] = max(75, int(result.get("risk_score", 0) or 0))
-    
+        # Universal semantic scoring is handled by the model using the evidence
+        # framework in SYSTEM_PROMPT. Keep deterministic overrides only for
+        # independently verified machine evidence; do not maintain phrase-specific
+        # scam scripts here. This prevents one test case from becoming a hard-coded
+        # rule and avoids weaker rules downgrading stronger evidence.
         return normalise_result(result)
     except Exception as exc:
             return {
@@ -733,91 +628,10 @@ Do not describe a legitimate payment intermediary as suspicious simply because i
     try:
         result = await call_openai(user_content)
 
-        # Deterministic guardrail for ordinary in-person loyalty/rewards QR cards.
-        # This intentionally works even when OpenCV cannot decode the QR. The vision
-        # model can still identify an ordinary physical rewards card from visible text.
-        combined = " ".join([
-            str(result.get("summary", "")),
-            " ".join(str(x) for x in (result.get("signals", []) or [])),
-            str(result.get("uncertainty", "")),
-        ]).lower()
-        ordinary_rewards = any(term in combined for term in [
-            "rewards program", "rewards programme", "loyalty",
-            "welcome perks", "welcome perk", "voucher", "free item",
-            "check-in", "rewards card", "membership"
-        ])
-        concrete_high_risk = any(term in combined for term in [
-            "request for otp", "asks for otp", "request for password", "asks for password",
-            "request for pin", "asks for pin", "banking credential",
-            "card security code", "cvv", "identity document",
-            "ic number", "nric", "passport number", "known threat",
-            "threat match", "lookalike domain", "credential harvesting",
-            "payment pressure", "urgent payment"
-        ])
-        if ordinary_rewards and not concrete_high_risk and not (
-            screenshot_web_risk and screenshot_web_risk.get("threat")
-        ):
-            result["risk"] = "LOW"
-            result["risk_score"] = min(20, int(result.get("risk_score", 10) or 10))
-            result["summary"] = (
-                "This appears to be an ordinary QR-based rewards or loyalty promotion. "
-                "No concrete scam warning signs are visible in the material provided."
-            )
-            result["signals"] = [
-                "QR code is presented as part of a normal rewards or loyalty promotion",
-                "No visible request for passwords, OTPs, banking credentials or identity documents",
-                "No concrete impersonation, payment-pressure or urgency warning signs are visible",
-            ]
-            result["uncertainty"] = (
-                "If the QR destination could not be decoded, its destination cannot be verified from this image alone."
-            )
-
-        # Stage 3: deterministic safety fusion. A confirmed URL threat always wins.
-        # A no-match never forces LOW; screenshot evidence can still raise risk.
-        # Universal QR/payment calibration: infrastructure uncertainty alone is neutral.
-        # Do not turn a third-party host/provider or inability to verify ownership into CAUTION.
-        # Concrete scam evidence and confirmed threat matches still take precedence.
-        result_text = " ".join([
-            str(result.get("summary", "")),
-            " ".join(str(x) for x in (result.get("signals", []) or [])),
-            str(result.get("uncertainty", "")),
-        ]).lower()
-        payment_qr = bool(qr_data) and any(x in qr_data.upper() for x in [
-            "SG.PAYNOW", "PAYNOW", "ORDER"
-        ])
-        neutral_infra_terms = any(x in result_text for x in [
-            "not an official", "general-purpose hosting", "general purpose hosting",
-            "unfamiliar domain", "cannot be independently verified"
-        ])
-        # Only count a hard warning when the analysis states concrete evidence.
-        # Do not trigger on negated phrases such as "no credential harvesting",
-        # "no altered payment details" or speculative "could be phishing".
-        hard_warning_terms = any(x in result_text for x in [
-            "lookalike domain detected", "credential harvesting detected",
-            "asks for otp", "request for otp", "asks for password", "request for password",
-            "asks for pin", "request for pin", "asks for cvv", "request for cvv",
-            "known threat match", "payee does not match", "merchant does not match",
-            "payment details were altered", "pressures you to pay", "urgent payment required"
-        ])
-        if payment_qr and neutral_infra_terms and not hard_warning_terms and not (
-            screenshot_web_risk and screenshot_web_risk.get("threat")
-        ):
-            result["risk"] = "LOW"
-            result["risk_score"] = min(20, int(result.get("risk_score", 10) or 10))
-            result["summary"] = (
-                "This appears to be an ordinary QR payment flow with internally consistent "
-                "transaction details and no concrete scam warning signs in the material provided."
-            )
-            result["signals"] = [
-                "The QR contains structured payment or transaction information",
-                "The visible payment details are consistent with the QR transaction context",
-                "A different payment provider or hosting domain is not a scam indicator by itself",
-                "No concrete credential-theft, payment-mismatch, pressure or known-threat signal was detected",
-            ]
-            result["uncertainty"] = (
-                "The screenshot and QR can be checked for warning signs, but they cannot by themselves prove that the merchant or transaction is genuine."
-            )
-
+        # Do not force LOW from free-form model wording. Ordinary rewards,
+        # payment processors and hosting differences are calibrated semantically in
+        # the prompt. Only independent machine evidence may deterministically raise
+        # risk here; this avoids an attacker gaming a LOW override with crafted text.
         if screenshot_web_risk and screenshot_web_risk.get("threat"):
             result["risk"] = "HIGH"
             result["risk_score"] = max(70, int(result.get("risk_score", 0) or 0))
