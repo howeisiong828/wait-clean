@@ -330,8 +330,11 @@ async def call_openai(user_content):
         )
 
     if response.status_code >= 400:
+        # Do not copy third-party response bodies into our exception/logs.
+        # They can contain request details or other information we do not need
+        # to retain when diagnosing a failed AI request.
         raise RuntimeError(
-            f"AI service returned error {response.status_code}:{response.text}"
+            f"AI service returned HTTP {response.status_code}"
         )
 
     data = response.json()
