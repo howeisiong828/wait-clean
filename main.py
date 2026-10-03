@@ -501,7 +501,7 @@ Domain resolution status:
 
 Interpret domain resolution carefully:
 - "resolves" means DNS records were found. This does NOT prove the website is safe, authentic, or even serving a working webpage.
-- "does_not_resolve" means the submitted hostname did not resolve at the time of this check. Say clearly: "The domain does not currently resolve." Do NOT say that website content, the website, or the destination "could not be verified", because that can falsely imply the checker tried to open or inspect the site. Do NOT call it a scam merely because it does not resolve, and do not pretend a functioning website was assessed.
+- "does_not_resolve" means the submitted hostname did not resolve at the time of this check. Say clearly: "The domain does not currently resolve." For this case, keep all uncertainty wording strictly about what the URL and DNS check establish. Do NOT say the website, website content, destination, content, intent, legitimacy, or authenticity "cannot be verified", "could not be verified", or similar, because that can falsely imply the checker tried to open or inspect the site. Do NOT advise waiting for the domain to resolve so the website/content can be verified. A suitable action is to check that the URL was copied correctly and independently confirm the intended address with the sender or organisation. Do NOT call it a scam merely because it does not resolve, and do not pretend a functioning website was assessed.
 - "unknown" means the DNS check was inconclusive or timed out. Treat that as uncertainty, not as a warning sign.
 Never claim that DNS resolution means the website was opened or visited. This checker does not fetch the submitted destination.
 
