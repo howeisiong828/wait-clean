@@ -8,6 +8,7 @@ import numpy as np
 from typing import Optional
 from PIL import Image, UnidentifiedImageError
 import io
+import socket
 from urllib.parse import urlparse
 
 import httpx
@@ -274,6 +275,28 @@ def normalise_url_for_check(value: str):
     return value
 
 
+async def check_domain_resolution(url: str):
+    """Check DNS only. Never connect to, fetch, or follow the submitted URL."""
+    try:
+        hostname = urlparse(url).hostname
+        if not hostname:
+            return "invalid"
+        # DNS resolution can block, so run it off the event loop and bound the wait.
+        import asyncio
+        loop = asyncio.get_running_loop()
+        await asyncio.wait_for(
+            loop.run_in_executor(None, socket.getaddrinfo, hostname, None),
+            timeout=3.0,
+        )
+        return "resolves"
+    except socket.gaierror:
+        return "does_not_resolve"
+    except TimeoutError:
+        return "unknown"
+    except Exception:
+        return "unknown"
+
+
 def qr_http_url(value: str):
     """Return a QR destination only when the decoded payload is explicitly HTTP(S)."""
     value = (value or "").strip()
@@ -431,11 +454,15 @@ async def analyze(req: TextRequest, request: Request):
     mode = req.mode if req.mode in {"message", "link", "call"} else "message"
 
     web_risk_result = None
+    domain_resolution = None
     checked_url = None
     if mode == "link":
         checked_url = normalise_url_for_check(text)
         if not checked_url:
             return {"error": "Please enter a valid http or https link."}
+
+        domain_resolution = await check_domain_resolution(checked_url)
+
         if WEB_RISK_API_KEY:
             web_risk_result = await check_web_risk(checked_url)
         else:
@@ -468,6 +495,15 @@ A Google Web Risk "checked_no_match" result must never cancel or reduce concrete
 Redirect/shortened-link calibration: when the submitted URL is an opaque redirect or shortened link whose final destination is not visible or independently resolved, treat that hidden destination as a meaningful uncertainty and normally use at least CAUTION. This applies by behaviour, not by a list of shortening brands. A no-match for the redirect/shortener URL does not establish anything about the unseen destination. Do not claim the final destination was checked unless it actually was. Do not fetch, open, or follow a user-submitted destination merely to resolve it, because the checker must not turn arbitrary user URLs into server-side requests.
 Do not expose internal status tokens such as "checked_no_match" or "threat_match" to the user. Describe them naturally, for example "Google Web Risk found no known threat match" or "Google Web Risk flagged this link as a known threat."
 If no meaningful suspicious indicator is present in the URL itself, use LOW while clearly stating that authenticity has not been verified.
+
+Domain resolution status:
+{domain_resolution or "unknown"}
+
+Interpret domain resolution carefully:
+- "resolves" means DNS records were found. This does NOT prove the website is safe, authentic, or even serving a working webpage.
+- "does_not_resolve" means the submitted hostname did not resolve at the time of this check. State this factual limitation clearly. Do NOT call it a scam merely because it does not resolve, and do not pretend a functioning website was assessed.
+- "unknown" means the DNS check was inconclusive or timed out. Treat that as uncertainty, not as a warning sign.
+Never claim that DNS resolution means the website was opened or visited. This checker does not fetch the submitted destination.
 
 Google Web Risk lookup status:
 {web_risk_result.get("status") if web_risk_result else "unavailable"}
