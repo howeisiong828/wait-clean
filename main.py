@@ -1470,6 +1470,22 @@ function clearDisplayedResult() {
     result.style.display = "none";
 }
 
+function watchForNewCheckInput(event) {
+    const target = event.target;
+    if (!target) return;
+
+    if (["linkInput", "messageInput", "callInput", "imageContext"].includes(target.id)) {
+        clearDisplayedResult();
+    }
+
+    if (target.id === "imageFile") {
+        clearDisplayedResult();
+    }
+}
+
+document.addEventListener("input", watchForNewCheckInput);
+document.addEventListener("change", watchForNewCheckInput);
+
 ["linkInput", "messageInput", "callInput", "imageContext"].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
