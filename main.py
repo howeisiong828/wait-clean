@@ -1464,6 +1464,25 @@ function setLoading(on) {
 }
 
 
+function clearDisplayedResult() {
+    const result = document.getElementById("result");
+    result.innerHTML = "";
+    result.style.display = "none";
+}
+
+["linkInput", "messageInput", "callInput", "imageContext"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener("input", clearDisplayedResult);
+    }
+});
+
+const imageFileInput = document.getElementById("imageFile");
+if (imageFileInput) {
+    imageFileInput.addEventListener("change", clearDisplayedResult);
+}
+
+
 async function checkText(mode) {
 const input =
     mode === "link"
