@@ -1280,6 +1280,9 @@ Tell us what the caller said, claimed to be, or asked you to do. Include as much
 <textarea
 id="callInput"
 maxlength="10000"
+oninput="clearDisplayedResult()"
+onchange="clearDisplayedResult()"
+onpaste="setTimeout(clearDisplayedResult, 0)"
 placeholder="Example: The caller said he was from my bank and told me to transfer my money to another account..."></textarea>
 
 <button class="primary" onclick="checkText('call')">
@@ -1339,6 +1342,9 @@ We'll assess the link for warning signs without asking you to open or visit it.
 id="linkInput"
 maxlength="10000"
 type="url"
+oninput="clearDisplayedResult()"
+onchange="clearDisplayedResult()"
+onpaste="setTimeout(clearDisplayedResult, 0)"
 placeholder="https://example.com/...">
 
 <button class="primary" onclick="checkText('link')">
@@ -1360,6 +1366,9 @@ content and early-stage social engineering.
 <textarea
 id="messageInput"
 maxlength="10000"
+oninput="clearDisplayedResult()"
+onchange="clearDisplayedResult()"
+onpaste="setTimeout(clearDisplayedResult, 0)"
 placeholder="Paste the suspicious message here..."></textarea>
 
 <button class="primary" onclick="checkText('message')">
