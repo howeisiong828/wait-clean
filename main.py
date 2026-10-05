@@ -1438,9 +1438,7 @@ Scammers often rely on urgency. Take time to verify unexpected
 requests independently before clicking, paying or sharing sensitive information.
 </p>
 
-<p>
-We provide risk guidance, not a guarantee that content is safe or fraudulent.
-</p>
+<p><strong>Important:</strong> STOP! CHECK! WAIT! provides automated risk guidance only. Results may be incomplete or incorrect and do not guarantee that any message, call, link, QR code or screenshot is safe, legitimate, fraudulent or a scam. Do not rely solely on a result for financial, security or other important decisions. When in doubt, verify independently through official channels.</p>
 
 <p class="singapore">
 Made in Singapore. Built for the world.
