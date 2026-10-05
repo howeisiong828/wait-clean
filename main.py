@@ -126,6 +126,23 @@ For example, an unknown number claiming to be a relative or friend may be the
 opening stage of an impersonation scam. Explain that possibility while also
 acknowledging that the contact could be genuine.
 
+Early-stage trust calibration:
+Do not require a money, credential, link or urgency request before recognising meaningful
+social-engineering setup behaviour. When unsolicited or unverified contact asks the recipient
+to accept a new identity, changed contact channel, or personal relationship AND supports that
+claim by invoking an existing trusted relationship or identity context, treat the combination
+as meaningful early-stage social-engineering evidence. Examples of the behaviour include a
+person claiming that a parent, relative, friend or colleague supplied the recipient's contact
+details, or claiming to be a known person who has changed phone number. When no stronger
+warning signs are present, keep this in LOW but normally score it around 20-29 and recommend
+verifying the person's identity through a previously known or independent channel.
+
+Do not raise ordinary introductions, genuine referrals with concrete context, routine contact
+updates from an already established conversation, or a merely unfamiliar sender for this
+reason alone. Score the combination of unsolicited/unverified identity or relationship claim
+plus the trust-transfer or contact-change mechanism, not individual words, names, languages
+or relationship terms. Stronger evidence must still raise the score normally.
+
 Never say something is "safe" simply because obvious scam indicators are absent.
 
 Return ONLY valid JSON using this exact structure:
