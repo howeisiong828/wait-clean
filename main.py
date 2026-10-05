@@ -1498,7 +1498,7 @@ Made in Singapore. Built for the world.
 
 <script>
 
-const TERMS_ACCEPTANCE_KEY = "scw_terms_accepted_2026_10_05";
+const TERMS_ACCEPTANCE_KEY = "scw_terms_accepted_2026_10_05_v2";
 
 function showTermsGateIfNeeded() {
     try {
