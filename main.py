@@ -1173,6 +1173,44 @@ font-weight: 800;
     font-weight: 700;
 }
 
+.terms-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+    background: rgba(10, 24, 44, .62);
+}
+
+.terms-gate-card {
+    width: min(520px, 100%);
+    background: white;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 18px 55px rgba(0,0,0,.25);
+}
+
+.terms-gate-card h2 {
+    margin: 0 0 12px;
+    color: var(--blue);
+}
+
+.terms-gate-card p {
+    line-height: 1.55;
+    margin: 10px 0;
+}
+
+.terms-gate-card a {
+    color: var(--blue2);
+    font-weight: 800;
+}
+
+.terms-gate-card .primary {
+    margin-top: 16px;
+}
+
 @media (max-width: 480px) {
     .shell {
         padding-top: 28px;
@@ -1192,6 +1230,15 @@ font-weight: 800;
 </head>
 
 <body>
+
+<div id="termsGate" class="terms-gate" role="dialog" aria-modal="true" aria-labelledby="termsGateTitle">
+    <div class="terms-gate-card">
+        <h2 id="termsGateTitle">Before you continue</h2>
+        <p>STOP! CHECK! WAIT! provides automated risk guidance and can make mistakes. A result does not guarantee that something is safe or fraudulent. Always verify important financial or security decisions independently.</p>
+        <p>By continuing, you agree to our <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of Use</a> and <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.</p>
+        <button class="primary" type="button" onclick="acceptTerms()">Continue</button>
+    </div>
+</div>
 
 <main class="shell">
 
@@ -1450,6 +1497,27 @@ Made in Singapore. Built for the world.
 
 
 <script>
+
+const TERMS_ACCEPTANCE_KEY = "scw_terms_accepted_2026_10_05";
+
+function showTermsGateIfNeeded() {
+    try {
+        if (localStorage.getItem(TERMS_ACCEPTANCE_KEY) !== "yes") {
+            document.getElementById("termsGate").style.display = "flex";
+        }
+    } catch {
+        document.getElementById("termsGate").style.display = "flex";
+    }
+}
+
+function acceptTerms() {
+    try {
+        localStorage.setItem(TERMS_ACCEPTANCE_KEY, "yes");
+    } catch {}
+    document.getElementById("termsGate").style.display = "none";
+}
+
+document.addEventListener("DOMContentLoaded", showTermsGateIfNeeded);
 
 function openPanel(id) {
 
