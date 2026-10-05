@@ -1438,7 +1438,7 @@ Scammers often rely on urgency. Take time to verify unexpected
 requests independently before clicking, paying or sharing sensitive information.
 </p>
 
-<p><strong>Important:</strong> STOP! CHECK! WAIT! provides automated risk guidance only. Results may be incomplete or incorrect and do not guarantee that any message, call, link, QR code or screenshot is safe, legitimate, fraudulent or a scam. Do not rely solely on a result for financial, security or other important decisions. When in doubt, verify independently through official channels.</p>
+<p><strong>Important:</strong> STOP! CHECK! WAIT! provides automated risk guidance only. Results may be incomplete or incorrect and do not guarantee that any message, call, link, QR code or screenshot is safe, legitimate, fraudulent or a scam. Do not rely solely on a result for financial, security or other important decisions. When in doubt, verify independently through official channels. To the fullest extent permitted by applicable law, STOP! CHECK! WAIT! and its creators are not liable for financial losses or other losses arising from reliance on, or use of, the service.</p>
 
 <p class="singapore">
 Made in Singapore. Built for the world.
