@@ -142,15 +142,12 @@ because there is no money, credential, link, urgency or secrecy request.
 Explain that this can be an early-stage impersonation or fake-friend pattern while acknowledging
 that the sender could still be genuine.
 
-Changed-number identity calibration:
-A bare changed-number notice with no attempt to make the recipient accept an identity may remain
-LOW but elevated. However, when a changed-number claim is combined with a claimed existing
-relationship, "remember me" style identity prompting, pressure to save/delete/replace a known
-contact, or another mechanism that asks the recipient to accept the new number as a trusted
-person without independent verification, treat that as materially stronger impersonation evidence.
-Normally score that combination in the 50-65 CAUTION range even before money or credentials are
-requested. If it progresses to payment/transfer, credentials, secrecy, suspicious links, coercion,
-or other strong scam evidence, raise the score further according to the combined evidence.
+Identity substitution calibration:
+Treat attempts to replace or establish a trusted identity or contact channel without independent
+verification as materially stronger evidence than a merely unfamiliar sender. Consider the combined
+behaviour: claimed existing relationship, identity prompting, contact-channel replacement, trust
+transfer, staged engagement, and whether a concrete independent verification route is provided.
+Do not reduce this evidence merely because money, credentials or urgency have not appeared yet.
 Concrete independently verifiable context may reduce concern when genuinely present.
 
 Stronger evidence must raise the score normally.
@@ -440,6 +437,38 @@ def safe_risk_score(value, default=50):
         return default
 
 
+def apply_semantic_risk_floor(result):
+    """Apply universal score floors only when the model itself identifies a behavioural combination."""
+    score = safe_risk_score(result.get("risk_score"), default=50)
+    evidence = " ".join([
+        str(result.get("summary", "")),
+        " ".join(str(x) for x in result.get("signals", []) if x is not None),
+    ]).lower()
+
+    identity_change = any(term in evidence for term in (
+        "changed phone number", "changed-number", "new number", "replace",
+        "save the new number", "delete the old number", "contact channel"
+    ))
+    relationship_claim = any(term in evidence for term in (
+        "existing relationship", "remembers the sender", "remember me",
+        "fake-friend", "impersonation", "trusted person", "family member",
+        "friend", "colleague"
+    ))
+    identity_acceptance = any(term in evidence for term in (
+        "establish trust", "trust-building", "accept the new", "save the new",
+        "identity", "impersonation"
+    ))
+
+    # This floor is based on the model's semantic findings, not raw user phrases.
+    # It therefore applies across wording and languages while avoiding keyword
+    # triggers in ordinary messages that the model did not identify as identity substitution.
+    if identity_change and relationship_claim and identity_acceptance:
+        result["risk_score"] = max(score, 50)
+        result["risk"] = "CAUTION"
+
+    return result
+
+
 def normalise_result(result):
     risk = str(result.get("risk", "CAUTION")).upper()
 
@@ -606,6 +635,7 @@ Submitted message:
         # independently verified machine evidence; do not maintain phrase-specific
         # scam scripts here. This prevents one test case from becoming a hard-coded
         # rule and avoids weaker rules downgrading stronger evidence.
+        result = apply_semantic_risk_floor(result)
         return normalise_result(result)
     except Exception as exc:
             return {
