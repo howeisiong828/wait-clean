@@ -397,7 +397,7 @@ async def call_openai(user_content):
                 "content": user_content
             }
         ],
-        "temperature": 0.1,
+        "temperature": 0,
         "max_completion_tokens": 900,
         "response_format": {"type": "json_object"}
     }
