@@ -136,8 +136,9 @@ message combines multiple trust-establishment mechanisms such as claiming a prio
 relationship, invoking an unnamed or unverifiable mutual contact/referrer, asking the recipient
 to confirm their identity or current contact channel, claiming a changed number, or deliberately
 staging future information or requests after initial engagement. When two or more such mechanisms
-combine without concrete independent verification, normally use CAUTION rather than dismissing
-the message as LOW merely because there is no money, credential, link, urgency or secrecy request.
+combine without concrete independent verification, this is positive social-engineering evidence:
+set risk_score to at least 30 and risk to CAUTION. Do not return LOW for that combination merely
+because there is no money, credential, link, urgency or secrecy request.
 Explain that this can be an early-stage impersonation or fake-friend pattern while acknowledging
 that the sender could still be genuine. Stronger evidence must raise the score normally.
 
