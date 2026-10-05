@@ -438,36 +438,83 @@ def safe_risk_score(value, default=50):
 
 
 def apply_semantic_risk_floor(result):
-    """Apply universal score floors only when the model itself identifies a behavioural combination."""
+    """Apply cumulative universal risk floors from semantic findings produced by the model."""
     score = safe_risk_score(result.get("risk_score"), default=50)
     evidence = " ".join([
         str(result.get("summary", "")),
         " ".join(str(x) for x in result.get("signals", []) if x is not None),
+        str(result.get("uncertainty", "")),
     ]).lower()
 
-    identity_change = any(term in evidence for term in (
+    def has_any(terms):
+        return any(term in evidence for term in terms)
+
+    identity_change = has_any((
         "changed phone number", "changed-number", "new number", "replace",
         "save the new number", "delete the old number", "contact channel"
     ))
-    relationship_claim = any(term in evidence for term in (
+    relationship_claim = has_any((
         "existing relationship", "remembers the sender", "remember me",
         "fake-friend", "impersonation", "trusted person", "family member",
-        "friend", "colleague"
+        "friend", "colleague", "familiar name", "known person"
     ))
-    identity_acceptance = any(term in evidence for term in (
+    identity_acceptance = has_any((
         "establish trust", "trust-building", "accept the new", "save the new",
         "identity", "impersonation"
     ))
+    money_transfer = has_any((
+        "transfer money", "money transfer", "transfer funds", "send money",
+        "payment request", "pay money", "requested money", "request for money"
+    ))
+    third_party_payment = has_any((
+        "third party", "third-party", "to a friend", "another account",
+        "someone else's account", "different account"
+    ))
+    financial_access_excuse = has_any((
+        "cannot access banking", "can't access banking", "banking app",
+        "bank account inaccessible", "unable to access bank"
+    ))
+    repayment_promise = has_any((
+        "return it", "repay", "pay you back", "return money", "repayment"
+    ))
+    no_independent_verification = has_any((
+        "no independent verification", "without independent verification",
+        "cannot verify", "identity cannot be verified", "unverified"
+    ))
 
-    # This floor is based on the model's semantic findings, not raw user phrases.
-    # It therefore applies across wording and languages while avoiding keyword
-    # triggers in ordinary messages that the model did not identify as identity substitution.
-    if identity_change and relationship_claim and identity_acceptance:
-        result["risk_score"] = max(score, 50)
+    # Identity/contact substitution with trust acceptance is meaningful even
+    # before a harmful request appears.
+    identity_substitution = (
+        identity_change and relationship_claim and identity_acceptance
+    )
+    if identity_substitution:
+        score = max(score, 50)
+
+    # Escalate cumulatively when the semantic findings add a financial action
+    # to unverified identity substitution. These are behavioural categories,
+    # not raw-message keywords, names, amounts or memorised test cases.
+    if identity_substitution and money_transfer:
+        score = max(score, 75)
+
+    # Multiple independent aggravators justify a stronger HIGH result.
+    aggravators = sum((
+        bool(third_party_payment),
+        bool(financial_access_excuse),
+        bool(repayment_promise),
+        bool(no_independent_verification),
+    ))
+    if identity_substitution and money_transfer and aggravators >= 2:
+        score = max(score, 85)
+
+    result["risk_score"] = score
+    if score <= 29:
+        result["risk"] = "LOW"
+    elif score <= 69:
         result["risk"] = "CAUTION"
+    else:
+        result["risk"] = "HIGH"
 
     return result
-
 
 def normalise_result(result):
     risk = str(result.get("risk", "CAUTION")).upper()
