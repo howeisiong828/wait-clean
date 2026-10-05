@@ -1429,7 +1429,7 @@ View last 10 checks
 <section class="safety">
 
 <p><strong>Your privacy matters.</strong> We don't store what you submit on our servers after processing. Some information is securely processed by third-party services to perform your check.</p>
-<p><a href="/privacy" style="color:#17467d;font-weight:700;">Learn more in our Privacy Policy</a></p>
+<p><a href="/privacy" style="color:#17467d;font-weight:700;">Privacy Policy</a> &nbsp;|&nbsp; <a href="/terms" style="color:#17467d;font-weight:700;">Terms of Use</a></p>
 
 <strong>STOP. CHECK. WAIT.</strong>
 
@@ -2004,4 +2004,9 @@ function escapeHtml(value) {
 @app.get("/privacy", response_class=HTMLResponse)
 def privacy_policy():
     with open("privacy.html", "r", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/terms", response_class=HTMLResponse)
+def terms_of_use():
+    with open("terms.html", "r", encoding="utf-8") as f:
         return f.read()
