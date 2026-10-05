@@ -438,71 +438,14 @@ def safe_risk_score(value, default=50):
 
 
 def apply_semantic_risk_floor(result):
-    """Apply cumulative universal risk floors from semantic findings produced by the model."""
+    """Apply only deterministic floors that do not depend on model prose.
+
+    Text and call risk are calibrated in one shared evidence model in SYSTEM_PROMPT.
+    Independent machine evidence such as Web Risk is applied by the endpoint before
+    this function. Do not re-classify the model's explanation text here: wording in
+    summaries/signals is non-canonical and made identical inputs unstable.
+    """
     score = safe_risk_score(result.get("risk_score"), default=50)
-    evidence = " ".join([
-        str(result.get("summary", "")),
-        " ".join(str(x) for x in result.get("signals", []) if x is not None),
-        str(result.get("uncertainty", "")),
-    ]).lower()
-
-    def has_any(terms):
-        return any(term in evidence for term in terms)
-
-    identity_change = has_any((
-        "changed phone number", "changed-number", "new number", "replace",
-        "save the new number", "delete the old number", "contact channel"
-    ))
-    relationship_claim = has_any((
-        "existing relationship", "remembers the sender", "remember me",
-        "fake-friend", "impersonation", "trusted person", "family member",
-        "friend", "colleague", "familiar name", "known person"
-    ))
-    identity_acceptance = has_any((
-        "establish trust", "trust-building", "accept the new", "save the new",
-        "identity", "impersonation"
-    ))
-    money_transfer = has_any((
-        "transfer money", "money transfer", "transfer funds", "send money",
-        "payment request", "pay money", "requested money", "request for money"
-    ))
-    third_party_payment = has_any((
-        "third party", "third-party", "to a friend", "another account",
-        "someone else's account", "different account"
-    ))
-    financial_access_excuse = has_any((
-        "cannot access banking", "can't access banking", "banking app",
-        "bank account inaccessible", "unable to access bank"
-    ))
-    repayment_promise = has_any((
-        "return it", "repay", "pay you back", "return money", "repayment"
-    ))
-    no_independent_verification = has_any((
-        "no independent verification", "without independent verification",
-        "cannot verify", "identity cannot be verified", "unverified"
-    ))
-
-    # Identity/contact substitution with trust acceptance is meaningful even
-    # before a harmful request appears.
-    identity_substitution = (
-        identity_change and relationship_claim and identity_acceptance
-    )
-    # Escalate cumulatively when the semantic findings add a financial action
-    # to unverified identity substitution. These are behavioural categories,
-    # not raw-message keywords, names, amounts or memorised test cases.
-    if identity_substitution and money_transfer:
-        score = max(score, 75)
-
-    # Multiple independent aggravators justify a stronger HIGH result.
-    aggravators = sum((
-        bool(third_party_payment),
-        bool(financial_access_excuse),
-        bool(repayment_promise),
-        bool(no_independent_verification),
-    ))
-    if identity_substitution and money_transfer and aggravators >= 2:
-        score = max(score, 85)
-
     result["risk_score"] = score
     if score <= 29:
         result["risk"] = "LOW"
@@ -510,8 +453,8 @@ def apply_semantic_risk_floor(result):
         result["risk"] = "CAUTION"
     else:
         result["risk"] = "HIGH"
-
     return result
+
 
 def normalise_result(result):
     risk = str(result.get("risk", "CAUTION")).upper()
@@ -650,7 +593,7 @@ Focus on impersonation, urgency, secrecy, requests for money, banking details, O
 Do not assume the caller is fraudulent solely because the caller is unknown.
 GROUNDING RULE: Use only facts established by the submitted call description or explicit user context. Never describe the call as unsolicited, unexpected, unknown, unverified, random, or similar unless the input explicitly establishes that fact. Do not invent caller history, prior contact, or circumstances that are not shown.
 Ordinary family or social requests to buy food or everyday items are not money-transfer warning signs by themselves. Do not reinterpret "buy lunch", "buy food", or similar everyday purchase requests as "send money", "transfer money", or "leave money". Resolve ordinary pronouns from context: for example, in "buy lunch ... leave it in the fridge", "it" refers to the lunch, not money. Keep such calls LOW when there is no changed-number claim, transfer/payment request, suspicious link, credential request, secrecy, unusual urgency, impersonation inconsistency, or other concrete scam indicator.
-MODE CONSISTENCY RULE: The fact that content was spoken on a phone call rather than received as a written message is not itself a warning sign. Apply the same universal evidence model and risk thresholds across call and message modes. Ordinary recruitment or business travel can remain LOW when the organisation is responsible for normal travel/accommodation costs, the recipient is given a concrete independently actionable verification route (for example, locating contact details on the organisation's official website independently), and there is no payment, credential request, secrecy, coercion, contradictory identity evidence, unusual reward/vagueness combination, or other concrete warning signal. Do not raise such a scenario merely because travel or an interview is involved.
+MODE CONSISTENCY RULE: The fact that content was spoken on a phone call rather than received as a written message is not itself a warning sign. Apply the same universal evidence model and risk thresholds across call and message modes. Do not create a different scoring rule merely because this is call mode. Early-stage identity substitution, changed-contact and staged trust evidence must be treated the same way here as in message mode. Ordinary recruitment or business travel can remain LOW when the organisation is responsible for normal travel/accommodation costs, the recipient is given a concrete independently actionable verification route (for example, locating contact details on the organisation's official website independently), and there is no payment, credential request, secrecy, coercion, contradictory identity evidence, unusual reward/vagueness combination, or other concrete warning signal. Do not raise such a scenario merely because travel or an interview is involved.
 Clearly distinguish warning signs from things that cannot be verified.
 
 Submitted call:
@@ -662,7 +605,7 @@ Analyse this message for scam and social-engineering risk.
 
 Pay attention to the stage of the conversation. An apparently friendly opening
 from an unknown person can still be an impersonation setup. GROUNDING RULE: Use only facts established by the submitted content or explicit user context. Never describe contact as "unsolicited", "unexpected", "unknown", "random", or similar unless the input explicitly establishes that fact. Do not infer sender history, prior contact, whether the recipient requested the message, or other circumstances that are not shown.
-Ordinary family or social requests to buy food or everyday items are not money-transfer warning signs by themselves. Do not reinterpret "buy lunch", "buy food", or similar everyday purchase requests as "send money", "transfer money", or "leave money". Keep such messages LOW when there is no changed-number claim, transfer/payment request, suspicious link, credential request, secrecy, unusual urgency, impersonation inconsistency, or other concrete scam indicator. Do not raise risk merely because a sender cannot be independently verified. An invitation to join an investment, stock-tip, portfolio-advice or trading group through WhatsApp, Telegram or a similar external group is a meaningful early-stage investment-scam warning sign even before money, credentials or urgency appear; use at least CAUTION when the submitted content itself establishes that combination. Otherwise, if there is no suspicious link, payment request, request for credentials or OTP, impersonation inconsistency, threat, unusual urgency, or other concrete scam indicator, use LOW risk and clearly state that authenticity cannot be confirmed from the message alone.
+Ordinary family or social requests to buy food or everyday items are not money-transfer warning signs by themselves. Do not reinterpret "buy lunch", "buy food", or similar everyday purchase requests as "send money", "transfer money", or "leave money". Keep such messages LOW when there is no changed-number claim, transfer/payment request, suspicious link, credential request, secrecy, unusual urgency, impersonation inconsistency, or other concrete scam indicator. Do not raise risk merely because a sender cannot be independently verified. An invitation to join an investment, stock-tip, portfolio-advice or trading group through WhatsApp, Telegram or a similar external group is a meaningful early-stage investment-scam warning sign even before money, credentials or urgency appear; use at least CAUTION when the submitted content itself establishes that combination. Otherwise, use the shared universal evidence model and thresholds in the system instructions. Do not force LOW merely because a harmful request has not appeared yet. A genuine ordinary family or social message with no identity or contact-channel reset, staged trust establishment, payment, credential, link, secrecy, threat, coercion or other meaningful warning sign should remain LOW.
 
 Submitted message:
 {text}
