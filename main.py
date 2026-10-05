@@ -128,27 +128,35 @@ acknowledging that the contact could be genuine.
 
 Early-stage trust calibration:
 Do not require a money, credential, link or urgency request before recognising meaningful
-social-engineering setup behaviour. Positive evidence of staged trust establishment can itself
-justify CAUTION even before the harmful request appears.
+social-engineering setup behaviour. However, distinguish a trust-building objective from an
+incidental identity or contact explanation.
 
-Treat an unsolicited or unverified sender as meaningful social-engineering evidence when the
-message combines multiple trust-establishment mechanisms such as claiming a prior meeting or
-relationship, invoking an unnamed or unverifiable mutual contact/referrer, asking the recipient
-to confirm their identity or current contact channel, claiming a changed number, or deliberately
-staging future information or requests after initial engagement. When two or more such mechanisms
-combine without concrete independent verification, this is positive social-engineering evidence:
-set risk_score to at least 30 and risk to CAUTION. Do not return LOW for that combination merely
-because there is no money, credential, link, urgency or secrecy request.
-Explain that this can be an early-stage impersonation or fake-friend pattern while acknowledging
-that the sender could still be genuine.
+Evaluate the requested action and plausible consequence together with identity evidence.
+A changed number, borrowed phone, claimed relationship, or unverifiable identity is uncertainty,
+not automatically scam risk. If the message's actual purpose is a harmless ordinary action with
+essentially no exploitable consequence, such as a routine household, food, scheduling or logistical
+request, keep it LOW even when the sender explains a changed or borrowed contact channel. Put the
+identity limitation under uncertainty rather than treating it as staged trust evidence.
+
+Use CAUTION for early-stage identity/contact establishment when the behavioural purpose itself is
+to create or replace trust for future engagement, for example asking the recipient to save a new
+contact channel, confirm that they remember or recognise the sender, accept an unverifiable referral,
+or continue an ambiguous relationship whose purpose is not otherwise explained by an ordinary
+harmless action. Multiple such trust-establishment mechanisms strengthen that assessment.
+
+Escalate normally when uncertain or substituted identity is coupled to an action with meaningful
+harm potential, including payment or transfer, credentials or sensitive information, suspicious
+links, app installation or remote access, secrecy, coercion, or another consequential action.
+Thus identity uncertainty is a risk multiplier when connected to exploitable action; it is not a
+standalone minimum score.
 
 Identity substitution calibration:
-Treat attempts to replace or establish a trusted identity or contact channel without independent
-verification as materially stronger evidence than a merely unfamiliar sender. Consider the combined
-behaviour: claimed existing relationship, identity prompting, contact-channel replacement, trust
-transfer, staged engagement, and whether a concrete independent verification route is provided.
-Do not reduce this evidence merely because money, credentials or urgency have not appeared yet.
-Concrete independently verifiable context may reduce concern when genuinely present.
+Treat genuine attempts to replace or establish a trusted identity or contact channel as stronger
+than a merely unfamiliar sender, but first determine whether contact replacement is actually the
+objective of the message or merely incidental context for a harmless ordinary request. Consider
+the combined behaviour: claimed relationship, identity prompting, contact-channel replacement,
+trust transfer, staged engagement, requested action, plausible consequence, and independent
+verification evidence.
 
 Stronger evidence must raise the score normally.
 
@@ -592,7 +600,7 @@ Treat the submitted text as the user's recollection of what a caller said or ask
 Focus on impersonation, urgency, secrecy, requests for money, banking details, OTPs, passwords, personal information, links, app installation, or remote access.
 Do not assume the caller is fraudulent solely because the caller is unknown.
 GROUNDING RULE: Use only facts established by the submitted call description or explicit user context. Never describe the call as unsolicited, unexpected, unknown, unverified, random, or similar unless the input explicitly establishes that fact. Do not invent caller history, prior contact, or circumstances that are not shown.
-Ordinary family or social requests to buy food or everyday items are not money-transfer warning signs by themselves. Do not reinterpret "buy lunch", "buy food", or similar everyday purchase requests as "send money", "transfer money", or "leave money". Resolve ordinary pronouns from context: for example, in "buy lunch ... leave it in the fridge", "it" refers to the lunch, not money. Keep such calls LOW when there is no changed-number claim, transfer/payment request, suspicious link, credential request, secrecy, unusual urgency, impersonation inconsistency, or other concrete scam indicator.
+Ordinary family or social requests to buy food or everyday items are not money-transfer warning signs by themselves. Do not reinterpret "buy lunch", "buy food", or similar everyday purchase requests as "send money", "transfer money", or "leave money". Resolve ordinary pronouns from context: for example, in "buy lunch ... leave it in the fridge", "it" refers to the lunch, not money. Keep such calls LOW when the requested action is an ordinary harmless action with essentially no exploitable consequence and there is no transfer/payment request, suspicious link, credential request, secrecy, unusual urgency, deceptive identity evidence, or other concrete scam indicator. A changed or borrowed contact channel alone does not override a harmless ordinary request.
 MODE CONSISTENCY RULE: The fact that content was spoken on a phone call rather than received as a written message is not itself a warning sign. Apply the same universal evidence model and risk thresholds across call and message modes. Do not create a different scoring rule merely because this is call mode. Early-stage identity substitution, changed-contact and staged trust evidence must be treated the same way here as in message mode. Ordinary recruitment or business travel can remain LOW when the organisation is responsible for normal travel/accommodation costs, the recipient is given a concrete independently actionable verification route (for example, locating contact details on the organisation's official website independently), and there is no payment, credential request, secrecy, coercion, contradictory identity evidence, unusual reward/vagueness combination, or other concrete warning signal. Do not raise such a scenario merely because travel or an interview is involved.
 Clearly distinguish warning signs from things that cannot be verified.
 
@@ -605,7 +613,7 @@ Analyse this message for scam and social-engineering risk.
 
 Pay attention to the stage of the conversation. An apparently friendly opening
 from an unknown person can still be an impersonation setup. GROUNDING RULE: Use only facts established by the submitted content or explicit user context. Never describe contact as "unsolicited", "unexpected", "unknown", "random", or similar unless the input explicitly establishes that fact. Do not infer sender history, prior contact, whether the recipient requested the message, or other circumstances that are not shown.
-Ordinary family or social requests to buy food or everyday items are not money-transfer warning signs by themselves. Do not reinterpret "buy lunch", "buy food", or similar everyday purchase requests as "send money", "transfer money", or "leave money". Keep such messages LOW when there is no changed-number claim, transfer/payment request, suspicious link, credential request, secrecy, unusual urgency, impersonation inconsistency, or other concrete scam indicator. Do not raise risk merely because a sender cannot be independently verified. An invitation to join an investment, stock-tip, portfolio-advice or trading group through WhatsApp, Telegram or a similar external group is a meaningful early-stage investment-scam warning sign even before money, credentials or urgency appear; use at least CAUTION when the submitted content itself establishes that combination. Otherwise, use the shared universal evidence model and thresholds in the system instructions. Do not force LOW merely because a harmful request has not appeared yet. A genuine ordinary family or social message with no identity or contact-channel reset, staged trust establishment, payment, credential, link, secrecy, threat, coercion or other meaningful warning sign should remain LOW.
+Ordinary family or social requests to buy food or everyday items are not money-transfer warning signs by themselves. Do not reinterpret "buy lunch", "buy food", or similar everyday purchase requests as "send money", "transfer money", or "leave money". Keep such messages LOW when the requested action is an ordinary harmless action with essentially no exploitable consequence and there is no transfer/payment request, suspicious link, credential request, secrecy, unusual urgency, deceptive identity evidence, or other concrete scam indicator. A changed or borrowed contact channel alone does not override a harmless ordinary request. Do not raise risk merely because a sender cannot be independently verified. An invitation to join an investment, stock-tip, portfolio-advice or trading group through WhatsApp, Telegram or a similar external group is a meaningful early-stage investment-scam warning sign even before money, credentials or urgency appear; use at least CAUTION when the submitted content itself establishes that combination. Otherwise, use the shared universal evidence model and thresholds in the system instructions. Do not force LOW merely because a harmful request has not appeared yet. A genuine ordinary family or social message with no identity or contact-channel reset, staged trust establishment, payment, credential, link, secrecy, threat, coercion or other meaningful warning sign should remain LOW.
 
 Submitted message:
 {text}
