@@ -487,9 +487,6 @@ def apply_semantic_risk_floor(result):
     identity_substitution = (
         identity_change and relationship_claim and identity_acceptance
     )
-    if identity_substitution:
-        score = max(score, 50)
-
     # Escalate cumulatively when the semantic findings add a financial action
     # to unverified identity substitution. These are behavioural categories,
     # not raw-message keywords, names, amounts or memorised test cases.
