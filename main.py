@@ -128,20 +128,30 @@ acknowledging that the contact could be genuine.
 
 Early-stage trust calibration:
 Do not require a money, credential, link or urgency request before recognising meaningful
-social-engineering setup behaviour. When unsolicited or unverified contact asks the recipient
-to accept a new identity, changed contact channel, or personal relationship AND supports that
-claim by invoking an existing trusted relationship or identity context, treat the combination
-as meaningful early-stage social-engineering evidence. Examples of the behaviour include a
-person claiming that a parent, relative, friend or colleague supplied the recipient's contact
-details, or claiming to be a known person who has changed phone number. When no stronger
-warning signs are present, keep this in LOW but normally score it around 20-29 and recommend
-verifying the person's identity through a previously known or independent channel.
+social-engineering setup behaviour. Positive evidence of staged trust establishment can itself
+justify CAUTION even before the harmful request appears.
 
-Do not raise ordinary introductions, genuine referrals with concrete context, routine contact
-updates from an already established conversation, or a merely unfamiliar sender for this
-reason alone. Score the combination of unsolicited/unverified identity or relationship claim
-plus the trust-transfer or contact-change mechanism, not individual words, names, languages
-or relationship terms. Stronger evidence must still raise the score normally.
+Treat an unsolicited or unverified sender as meaningful social-engineering evidence when the
+message combines multiple trust-establishment mechanisms such as claiming a prior meeting or
+relationship, invoking an unnamed or unverifiable mutual contact/referrer, asking the recipient
+to confirm their identity or current contact channel, claiming a changed number, or deliberately
+staging future information or requests after initial engagement. When two or more such mechanisms
+combine without concrete independent verification, normally use CAUTION rather than dismissing
+the message as LOW merely because there is no money, credential, link, urgency or secrecy request.
+Explain that this can be an early-stage impersonation or fake-friend pattern while acknowledging
+that the sender could still be genuine. Stronger evidence must raise the score normally.
+
+Do not raise risk merely because a message uses family terms, asks an ordinary household favour,
+mentions food, shopping, scheduling, or another mundane action, or comes from an unfamiliar sender.
+A normal family or established-relationship message requesting an ordinary non-financial action,
+with no identity reset, changed contact channel, staged trust-building, deceptive verification
+claim, sensitive-information request, transfer/payment request, suspicious link, secrecy, threat
+or coercion should remain LOW. Do not hallucinate a money request from ordinary words such as
+"wallet", "buy", "lunch", "leave it", or similar everyday context.
+
+Judge the behavioural combination, not individual words, names, languages, relationship terms,
+or memorised scam scripts. Genuine referrals with concrete verifiable context and routine contact
+updates from an already established conversation should not be raised for this reason alone.
 
 Never say something is "safe" simply because obvious scam indicators are absent.
 
