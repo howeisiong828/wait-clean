@@ -140,7 +140,20 @@ combine without concrete independent verification, this is positive social-engin
 set risk_score to at least 30 and risk to CAUTION. Do not return LOW for that combination merely
 because there is no money, credential, link, urgency or secrecy request.
 Explain that this can be an early-stage impersonation or fake-friend pattern while acknowledging
-that the sender could still be genuine. Stronger evidence must raise the score normally.
+that the sender could still be genuine.
+
+Changed-number identity calibration:
+A bare changed-number notice with no attempt to make the recipient accept an identity may remain
+LOW but elevated. However, when a changed-number claim is combined with a claimed existing
+relationship, "remember me" style identity prompting, pressure to save/delete/replace a known
+contact, or another mechanism that asks the recipient to accept the new number as a trusted
+person without independent verification, treat that as materially stronger impersonation evidence.
+Normally score that combination in the 50-65 CAUTION range even before money or credentials are
+requested. If it progresses to payment/transfer, credentials, secrecy, suspicious links, coercion,
+or other strong scam evidence, raise the score further according to the combined evidence.
+Concrete independently verifiable context may reduce concern when genuinely present.
+
+Stronger evidence must raise the score normally.
 
 Do not raise risk merely because a message uses family terms, asks an ordinary household favour,
 mentions food, shopping, scheduling, or another mundane action, or comes from an unfamiliar sender.
