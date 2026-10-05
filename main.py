@@ -162,11 +162,14 @@ Stronger evidence must raise the score normally.
 
 Do not raise risk merely because a message uses family terms, asks an ordinary household favour,
 mentions food, shopping, scheduling, or another mundane action, or comes from an unfamiliar sender.
-A normal family or established-relationship message requesting an ordinary non-financial action,
-with no identity reset, changed contact channel, staged trust-building, deceptive verification
-claim, sensitive-information request, transfer/payment request, suspicious link, secrecy, threat
-or coercion should remain LOW. Do not hallucinate a money request from ordinary words such as
-"wallet", "buy", "lunch", "leave it", or similar everyday context.
+A normal family or established-relationship message requesting an ordinary non-financial action
+should remain LOW when there is no sensitive-information request, transfer/payment request,
+suspicious link, secrecy, threat, coercion, deceptive verification claim, or other consequential
+action. An incidental changed or borrowed contact channel does not disqualify such a message from
+LOW. A statement that the sender will explain a phone/contact problem later is also neutral when
+the current requested action is harmless; do not reinterpret that alone as staged trust-building
+or delayed verification. Do not hallucinate a money request from ordinary words such as "wallet",
+"buy", "lunch", "leave it", or similar everyday context.
 
 Judge the behavioural combination, not individual words, names, languages, relationship terms,
 or memorised scam scripts. Genuine referrals with concrete verifiable context and routine contact
@@ -234,7 +237,7 @@ Examples include:
 - unsolicited romantic approaches that show possible trust-building or grooming
 - invitations to travel from someone known only briefly or primarily online
 - unusual requests for personal information
-- claimed family/friend identity combined with another setup signal
+- claimed family/friend identity combined with an independent meaningful setup signal whose purpose is trust establishment or exploitation; a borrowed/changed phone explanation, family term, or promise to explain a phone problem later is not such a signal by itself when the requested action is harmless
 - suspicious job opportunities with unusually attractive pay, vague company details or unusual travel requirements
 
 For travel-related job or relationship approaches, consider personal-safety risk as well as financial scam risk. If the circumstances could expose the person to trafficking, coercion or forced criminal activity, explain that as a possible risk rather than claiming that trafficking is occurring. Recommend independently verifying the organisation/person, destination and arrangements before travelling.
@@ -613,7 +616,7 @@ Analyse this message for scam and social-engineering risk.
 
 Pay attention to the stage of the conversation. An apparently friendly opening
 from an unknown person can still be an impersonation setup. GROUNDING RULE: Use only facts established by the submitted content or explicit user context. Never describe contact as "unsolicited", "unexpected", "unknown", "random", or similar unless the input explicitly establishes that fact. Do not infer sender history, prior contact, whether the recipient requested the message, or other circumstances that are not shown.
-Ordinary family or social requests to buy food or everyday items are not money-transfer warning signs by themselves. Do not reinterpret "buy lunch", "buy food", or similar everyday purchase requests as "send money", "transfer money", or "leave money". Keep such messages LOW when the requested action is an ordinary harmless action with essentially no exploitable consequence and there is no transfer/payment request, suspicious link, credential request, secrecy, unusual urgency, deceptive identity evidence, or other concrete scam indicator. A changed or borrowed contact channel alone does not override a harmless ordinary request. Do not raise risk merely because a sender cannot be independently verified. An invitation to join an investment, stock-tip, portfolio-advice or trading group through WhatsApp, Telegram or a similar external group is a meaningful early-stage investment-scam warning sign even before money, credentials or urgency appear; use at least CAUTION when the submitted content itself establishes that combination. Otherwise, use the shared universal evidence model and thresholds in the system instructions. Do not force LOW merely because a harmful request has not appeared yet. A genuine ordinary family or social message with no identity or contact-channel reset, staged trust establishment, payment, credential, link, secrecy, threat, coercion or other meaningful warning sign should remain LOW.
+Ordinary family or social requests to buy food or everyday items are not money-transfer warning signs by themselves. Do not reinterpret "buy lunch", "buy food", or similar everyday purchase requests as "send money", "transfer money", or "leave money". Keep such messages LOW when the requested action is an ordinary harmless action with essentially no exploitable consequence and there is no transfer/payment request, suspicious link, credential request, secrecy, unusual urgency, deceptive identity evidence, or other concrete scam indicator. A changed or borrowed contact channel alone does not override a harmless ordinary request. Do not raise risk merely because a sender cannot be independently verified. An invitation to join an investment, stock-tip, portfolio-advice or trading group through WhatsApp, Telegram or a similar external group is a meaningful early-stage investment-scam warning sign even before money, credentials or urgency appear; use at least CAUTION when the submitted content itself establishes that combination. Otherwise, use the shared universal evidence model and thresholds in the system instructions. Do not force LOW merely because a harmful request has not appeared yet. A genuine ordinary family or social message whose requested action is harmless should remain LOW when there is no payment, credential, suspicious link, secrecy, threat, coercion, deceptive verification claim or other meaningful warning sign. An incidental changed/borrowed contact channel or promise to explain that contact problem later does not by itself constitute staged trust establishment.
 
 Submitted message:
 {text}
