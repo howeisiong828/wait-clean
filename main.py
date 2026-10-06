@@ -394,7 +394,7 @@ async def check_web_risk(url: str):
         return {"status": "error", "threat": None}
 def extract_http_urls(text: str, limit: int = 5):
     """Extract bounded HTTP(S) URLs from submitted text without opening them."""
-    candidates = re.findall(r'https?://[^\\s<>"\\']+', text or "", flags=re.IGNORECASE)
+    candidates = re.findall(r"https?://[^\\s<>\\\"']+", text or "", flags=re.IGNORECASE)
     urls = []
     for raw in candidates:
         candidate = raw.rstrip(".,;:!?)]}")
