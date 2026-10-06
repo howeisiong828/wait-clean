@@ -806,7 +806,7 @@ request: Request = None,
     user_content = [
         {
             "type": "text",
-            "text": """
+            "text": f"""
 Analyse this screenshot for scam and social-engineering risk.
 
 Read the visible text and also examine visual context such as claimed branding,
@@ -817,7 +817,7 @@ Do not assume a logo or professional-looking design proves authenticity.
 Do not declare the content safe merely because no payment request has appeared yet.
 
 Independent machine checks for visible or decoded URLs:
-${format_url_evidence(image_url_evidence)}
+{format_url_evidence(image_url_evidence)}
 These checks use the same DNS and Google Web Risk evidence as Check Link. A no-match does not prove safety, DNS resolution does not prove legitimacy, and no destination was opened, visited, followed or inspected. Combine this machine evidence with the entire screenshot context. A threat_match is strong independent evidence.
 
 Image instruction safety:
