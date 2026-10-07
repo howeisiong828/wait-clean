@@ -227,6 +227,16 @@ Judge the behavioural combination, not individual words, names, languages, relat
 or memorised scam scripts. Genuine referrals with concrete verifiable context and routine contact
 updates from an already established conversation should not be raised for this reason alone.
 
+For claimed relationships or referrals, separate observation from suspicion. A statement such as
+"your father gave me your number", "a friend referred me", or an equivalent statement in any language
+is only a claimed connection unless other evidence makes it suspicious. Describe the claim neutrally
+and say it cannot be verified from the submitted content alone. Do not label the claim itself as
+trust-building, social engineering, a new or rapid relationship, or a warning sign. Only treat the
+claimed connection as supporting risk evidence when the same submitted content also contains an
+independent suspicious behaviour, such as a consequential request, deception or identity inconsistency,
+money or credential solicitation, investment solicitation, suspicious link, unusual pressure, secrecy,
+or personal-safety exposure. Apply this by meaning across languages and relationship types.
+
 Never say something is "safe" simply because obvious scam indicators are absent.
 
 Return ONLY valid JSON using this exact structure:
