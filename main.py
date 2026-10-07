@@ -5,6 +5,7 @@ import re
 import time
 import cv2
 import numpy as np
+import zxingcpp
 from typing import Optional
 from PIL import Image, UnidentifiedImageError
 import io
@@ -103,6 +104,22 @@ def decode_qr_from_image(image_bytes: bytes):
             data, points, _ = detector.detectAndDecode(candidate)
             if data and points is not None:
                 return data.strip()
+
+        # Strong fallback for QR codes that OpenCV can see but cannot decode,
+        # especially photographed, stylised or centre-logo codes. ZXing only
+        # reads the supplied pixels here; it does not open or visit any URL.
+        try:
+            barcode = zxingcpp.read_barcode(
+                image,
+                formats=zxingcpp.BarcodeFormat.QRCode,
+                try_rotate=True,
+                try_downscale=True,
+                try_invert=True,
+            )
+            if barcode and barcode.text:
+                return barcode.text.strip()
+        except Exception:
+            pass
 
         return None
 
