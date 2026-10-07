@@ -64,10 +64,45 @@ def decode_qr_from_image(image_bytes: bytes):
             return None
 
         detector = cv2.QRCodeDetector()
-        data, points, _ = detector.detectAndDecode(image)
 
+        # First try the original image unchanged.
+        data, points, _ = detector.detectAndDecode(image)
         if data and points is not None:
             return data.strip()
+
+        # Printed, photographed and slightly blurred QR codes can fail on the
+        # original frame. Retry a few safe image representations locally.
+        # This only decodes pixels already supplied by the user and never opens,
+        # visits or resolves the decoded destination.
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        candidates = [gray]
+
+        # Upscaling helps small or photographed module patterns.
+        h, w = gray.shape[:2]
+        if max(h, w) < 3000:
+            candidates.append(
+                cv2.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_CUBIC)
+            )
+
+        # Contrast normalisation helps uneven lighting and printed material.
+        candidates.append(cv2.equalizeHist(gray))
+
+        # Adaptive thresholding helps low-contrast paper photographs.
+        candidates.append(
+            cv2.adaptiveThreshold(
+                gray,
+                255,
+                cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                cv2.THRESH_BINARY,
+                31,
+                5,
+            )
+        )
+
+        for candidate in candidates:
+            data, points, _ = detector.detectAndDecode(candidate)
+            if data and points is not None:
+                return data.strip()
 
         return None
 
