@@ -237,6 +237,16 @@ independent suspicious behaviour, such as a consequential request, deception or 
 money or credential solicitation, investment solicitation, suspicious link, unusual pressure, secrecy,
 or personal-safety exposure. Apply this by meaning across languages and relationship types.
 
+Distinguish a simple referral from identity substitution. If an unverified contact claims to already be
+a person the recipient knows and asks the recipient to replace, abandon, avoid, or redirect an established
+communication channel to a new number, account, handle, address, or other contact route, treat that
+combination as a meaningful identity-impersonation warning sign even when no money or credentials are
+requested yet. Examples include claiming a phone is lost or broken and asking the recipient to save a
+new number or not use the known number. Do not require those exact words or scenarios. The general rule
+is: claimed known identity + unverified replacement of an established contact channel. This combination
+should normally warrant at least CAUTION, while a mere introduction or referral that does not replace
+an existing identity or channel must not be raised by this rule.
+
 Never say something is "safe" simply because obvious scam indicators are absent.
 
 Return ONLY valid JSON using this exact structure:
