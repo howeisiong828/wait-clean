@@ -233,7 +233,17 @@ Return ONLY valid JSON using this exact structure:
 
 {
   "risk": "LOW" | "CAUTION" | "HIGH",
-  "risk_score" 0,
+  "risk_score": 0,
+  "evidence": {
+    "prior_event_claimed": true | false,
+    "prior_event_user_status": "confirmed" | "denied" | "unknown",
+    "requested_action": "none" | "ordinary" | "continue_engagement" | "travel_meeting" | "payment_transfer" | "sensitive_information" | "authentication_credential" | "app_install_remote_access",
+    "money_direction": "none" | "offered_to_user" | "requested_from_user" | "unclear",
+    "pressure": "none" | "urgency" | "threat" | "secrecy_coercion",
+    "technical_threat": true | false,
+    "new_or_rapid_relationship": true | false,
+    "personal_safety_exposure": true | false
+  },
   "summary": "short plain-language assessment",
   "signals": [
     "specific reason based on the submitted content"
@@ -244,6 +254,15 @@ Return ONLY valid JSON using this exact structure:
   ],
   "language": "detected language"
 }
+
+Structured evidence extraction:
+Fill the evidence object from facts, before deciding the score or writing the explanation. These fields describe facts rather than your risk conclusion.
+A prior event is something the sender claims already happened, such as a survey completed, purchase made, application submitted, account action authorised, parcel ordered, appointment booked or prior contact established.
+Set prior_event_claimed=true only when the submitted content actually makes such a claim.
+Set prior_event_user_status=confirmed only when optional user context explicitly confirms that claimed event. Set it to denied only when optional user context explicitly says that claimed event did not happen. Otherwise use unknown. Never infer confirmed or denied from absence of context.
+requested_action describes what the recipient is actually being asked to do next. A link/form/contact instruction that continues the interaction is continue_engagement unless a more consequential category applies.
+money_direction describes the actual direction of money. An incentive, refund, prize or fee offered to the recipient is offered_to_user, not requested_from_user.
+Do not alter these factual fields merely to make them agree with your preferred risk score.
 
 Universal evidence model:
 Judge behaviours and relationships between facts, not exact wording, brand names, countries, currencies, or memorised scam scripts. Semantically equivalent wording in any language must be treated equivalently.
@@ -595,6 +614,49 @@ def apply_semantic_risk_floor(result):
     return result
 
 
+def score_structured_evidence(result):
+    """Universal backend scoring from factual evidence extracted by the model.
+
+    The model identifies facts. The backend enforces monotonic minimums from
+    combinations of those facts. It never lowers a model score.
+    """
+    score = safe_risk_score(result.get("risk_score"), default=50)
+    evidence = result.get("evidence")
+    if not isinstance(evidence, dict):
+        return apply_semantic_risk_floor(result)
+
+    prior_claim = evidence.get("prior_event_claimed") is True
+    prior_status = str(evidence.get("prior_event_user_status", "unknown"))
+    action = str(evidence.get("requested_action", "none"))
+    pressure = str(evidence.get("pressure", "none"))
+    technical = evidence.get("technical_threat") is True
+    rapid_relationship = evidence.get("new_or_rapid_relationship") is True
+    safety_exposure = evidence.get("personal_safety_exposure") is True
+
+    consequential = {
+        "continue_engagement", "travel_meeting", "payment_transfer",
+        "sensitive_information", "authentication_credential",
+        "app_install_remote_access"
+    }
+
+    if prior_claim and prior_status == "denied" and action in consequential:
+        score = max(score, 75)
+    if action in {"authentication_credential", "app_install_remote_access"}:
+        score = max(score, 75)
+    if technical:
+        score = max(score, 75)
+    if pressure in {"threat", "secrecy_coercion"} and action in {
+        "payment_transfer", "sensitive_information", "authentication_credential"
+    }:
+        score = max(score, 75)
+    if rapid_relationship and safety_exposure:
+        score = max(score, 40)
+
+    result["risk_score"] = score
+    result["risk"] = "LOW" if score <= 29 else "CAUTION" if score <= 69 else "HIGH"
+    return result
+
+
 def normalise_result(result):
     risk = str(result.get("risk", "CAUTION")).upper()
 
@@ -777,7 +839,7 @@ Submitted message:
         # independently verified machine evidence; do not maintain phrase-specific
         # scam scripts here. This prevents one test case from becoming a hard-coded
         # rule and avoids weaker rules downgrading stronger evidence.
-        result = apply_semantic_risk_floor(result)
+        result = score_structured_evidence(result)
         return normalise_result(result)
     except Exception as exc:
             return {
@@ -966,7 +1028,10 @@ Do not describe a legitimate payment intermediary as suspicious simply because i
         # risk here; this avoids an attacker gaming a LOW override with crafted text.
         if screenshot_web_risk and screenshot_web_risk.get("threat"):
             result["risk"] = "HIGH"
-            result["risk_score"] = max(70, safe_risk_score(result.get("risk_score"), default=70))
+            result["risk_score"] = max(75, safe_risk_score(result.get("risk_score"), default=75))
+            if isinstance(result.get("evidence"), dict):
+                result["evidence"]["technical_threat"] = True
+        result = score_structured_evidence(result)
         return normalise_result(result)
 
     except Exception as exc:
