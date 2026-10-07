@@ -448,6 +448,61 @@ def qr_http_url(value: str):
     return normalise_url_for_check(value)
 
 
+async def check_rdap_registration(url: str):
+    """Prototype RDAP lookup for domain registration facts.
+
+    This is deliberately observational only: it does not affect scoring,
+    prompts, explanations or the API response. Failure is silent to the scan.
+    """
+    checked_url = normalise_url_for_check(url)
+    hostname = urlparse(checked_url).hostname if checked_url else None
+    if not hostname:
+        return {"status": "invalid"}
+
+    # Start with the common gTLD RDAP service. Unsupported TLDs simply fail open.
+    endpoint = f"https://rdap.verisign.com/com/v1/domain/{hostname}" if hostname.endswith(".com") else None
+    if not endpoint:
+        return {"status": "unsupported"}
+
+    try:
+        async with httpx.AsyncClient(timeout=3.0, follow_redirects=False) as client:
+            response = await client.get(
+                endpoint,
+                headers={"Accept": "application/rdap+json, application/json"},
+            )
+        if response.status_code != 200:
+            print("RDAP_STATUS: HTTP", response.status_code, flush=True)
+            return {"status": "unavailable"}
+
+        data = response.json()
+        created = None
+        for event in data.get("events", []):
+            if event.get("eventAction") == "registration":
+                created = event.get("eventDate")
+                break
+
+        registrar = None
+        for entity in data.get("entities", []):
+            if "registrar" in entity.get("roles", []):
+                registrar = entity.get("handle")
+                break
+
+        print(
+            "RDAP_STATUS: success",
+            "created=" + ("yes" if created else "no"),
+            "registrar=" + ("yes" if registrar else "no"),
+            flush=True,
+        )
+        return {
+            "status": "success",
+            "registration_date": created,
+            "registrar_handle": registrar,
+        }
+    except Exception as exc:
+        print("RDAP_STATUS: error", type(exc).__name__, flush=True)
+        return {"status": "unavailable"}
+
+
 async def check_web_risk(url: str):
     checked_url = normalise_url_for_check(url)
     if not checked_url:
@@ -751,6 +806,10 @@ async def analyze(req: TextRequest, request: Request):
             return {"error": "Please enter a valid http or https link."}
 
         domain_resolution = await check_domain_resolution(checked_url)
+
+        # RDAP prototype: collect registration availability for diagnostics only.
+        # It is intentionally not passed to the model or scoring yet.
+        await check_rdap_registration(checked_url)
 
         if WEB_RISK_API_KEY:
             web_risk_result = await check_web_risk(checked_url)
