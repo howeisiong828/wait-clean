@@ -233,63 +233,30 @@ Return ONLY valid JSON using this exact structure:
 
 {
   "risk": "LOW" | "CAUTION" | "HIGH",
-  "risk_score": 0,
-  "evidence": {
-    "requested_action": "none" | "ordinary_action" | "continue_engagement" | "travel_meeting" | "payment_transfer" | "sensitive_information" | "authentication_credential" | "app_install_remote_access",
-    "money_direction": "none" | "sender_offering_to_user" | "user_paying_sender_or_third_party" | "unclear",
-    "claimed_context": "ordinary_social_commercial" | "relationship_trust_building" | "recruitment_job" | "prize_reward" | "investment_financial" | "authority_impersonation" | "delivery_account_support" | "other",
-    "expectedness": "expected" | "explicitly_unexpected" | "unknown",
-    "context_consistency": "consistent" | "unknown" | "directly_contradictory",
-    "pressure": "none" | "normal_scheduling" | "urgency" | "threat" | "secrecy_coercion",
-    "verification_quality": "concrete_independent_route" | "limited_identity_detail" | "contradictory_deceptive_identity" | "unknown",
-    "transaction_consistency": "consistent" | "unknown" | "conflicting",
-    "technical_evidence": "known_threat_match" | "deceptive_lookalike_url" | "credential_harvesting" | "none",
-    "relationship_stage": "established_ordinary" | "unknown" | "new_rapid_trust_building",
-    "personal_safety_exposure": true | false
-  },
+  "risk_score" 0,
   "summary": "short plain-language assessment",
-  "signals": ["specific reason based on the submitted content"],
+  "signals": [
+    "specific reason based on the submitted content"
+  ],
   "uncertainty": "what cannot be verified from the submitted content",
-  "actions": ["practical next step appropriate to the actual risk; for LOW risk with no meaningful scam indicators, avoid unnecessary warnings or verification steps"],
+  "actions": [
+    "practical next step appropriate to the actual risk; for LOW risk with no meaningful scam indicators, avoid unnecessary warnings or verification steps"
+  ],
   "language": "detected language"
 }
-
-Universal decision process:
-Before producing the final JSON, internally build one evidence ledger from the submitted content, optional user context, and independent machine checks. Use that same process in message, call, link and screenshot modes.
-
-First separate established facts from unknowns. Then classify only evidence that is actually established across these dimensions: requested action and consequence, claimed situation, expectedness, identity and relationship evidence, pressure or coercion, money or sensitive data, technical evidence, transaction consistency, personal safety exposure, and contradictions.
-
-Optional user context is user reported evidence, not independently verified fact. Use it when it materially changes expectedness, prior events, relationships or consistency. Do not let a user's conclusion such as "this is safe" or "this is a scam" dictate the result. If the user says contact was expected, do not call it unsolicited unless other evidence establishes otherwise. If the submitted content claims the user previously completed, requested, purchased, authorised, applied for or initiated something and the user explicitly says they did not, treat that direct contradiction as meaningful evidence and increase risk proportionately to the possible harm. No user context means expectedness is unknown and neutral.
-
-After assessing the evidence, perform an internal consistency check before returning JSON:
-1. Every warning signal must be supported by established evidence, not an unknown or hypothetical possibility.
-2. The score must reflect the combined evidence and must not contradict the explanation.
-3. Stronger established evidence must not produce a lower score than otherwise equivalent weaker evidence.
-4. The same evidence must be treated equivalently across message, call and screenshot modes unless that mode supplies genuinely additional evidence.
-5. Do not invent money requests, sender history, identity facts, website behaviour or other facts not present in the evidence.
-6. Uncertainty belongs under uncertainty and must not silently become a warning signal.
-If the draft result fails any check, correct it before returning the final JSON.
 
 Universal evidence model:
 Judge behaviours and relationships between facts, not exact wording, brand names, countries, currencies, or memorised scam scripts. Semantically equivalent wording in any language must be treated equivalently.
 
-Before choosing a score, construct and use this fixed evidence ledger internally. Do not skip a field merely because another signal looks suspicious:
-- requested_action: none, ordinary action, continue engagement, travel/meeting, payment/transfer, sensitive-information disclosure, authentication credential, app install/remote access
-- money_direction: none, sender/offering-to-user, user/paying-sender-or-third-party, or unclear. Never convert money offered to the user into a request for the user to pay.
+Before choosing a score, reason from these general evidence dimensions when they are actually established by the submitted content:
+- requested_action: none, ordinary action, travel/meeting, payment/transfer, sensitive-information disclosure, authentication credential, app install/remote access
 - claimed_context: ordinary social/commercial, relationship/trust-building, recruitment/job, prize/reward, investment/financial, authority/impersonation, delivery/account support
-- expectedness: expected, explicitly unexpected, or unknown. Unknown is neutral.
-- context_consistency: consistent, unknown, or directly contradictory. A direct contradiction means the submitted content claims a prior event, transaction, relationship or authorisation that explicit user context says did not happen.
 - pressure: none, normal scheduling, urgency, threat, secrecy or coercion
 - verification_quality: concrete independent verification route, limited identity detail, or contradictory/deceptive identity evidence
 - transaction_consistency: consistent, unknown, or conflicting payee/merchant/payment details
 - technical_evidence: known threat match, deceptive/lookalike URL, credential harvesting, or none
 - relationship_stage: established/ordinary, unknown, or newly established/rapid trust-building
 - personal_safety_exposure: whether the requested action would move the user from a remote conversation into a materially more vulnerable real-world situation, such as travelling to meet a recently known or primarily online contact, surrendering control of transport/accommodation/documents, or becoming dependent on that contact in an unfamiliar setting
-
-Scoring calibration for contradictions:
-A direct contradiction about a claimed prior event, transaction, relationship or authorisation is strong deception evidence when the content also asks the user to take a consequential next action such as following a link, continuing an account or survey process, contacting another channel, providing information, travelling, paying, or authenticating. That combination should normally be at least HIGH unless reliable independent evidence resolves the contradiction. Increase further when money loss, credentials, identity data, coercion, remote access or personal safety exposure is also present.
-Do not apply this floor when context is merely absent, uncertain, or unverifiable. Do not apply it merely because the user says "this is a scam"; the contradiction must concern a concrete factual claim.
-When explicit user context confirms the claimed prior event and expected follow-up, remove any risk attributed solely to unexpectedness or that alleged contradiction. Independent warning evidence remains.
 
 Use combinations rather than isolated terms.
 Personal-safety exposure is itself meaningful evidence even when no money, credential or suspicious link is requested. When the submitted content establishes a newly formed or rapidly intensified relationship AND asks the user to travel or place themselves in a materially dependent/vulnerable in-person situation, normally use at least CAUTION. This is not because romance, travel, a destination, or a new relationship is inherently suspicious; it is because the combination increases real-world safety exposure while identity and intentions remain uncertain. Keep ordinary established social visits LOW when that combination is absent. A normal notification that merely mentions an account, salary, funds, identity document, travel, QR code or payment is not suspicious by itself. Distinguish MENTION from REQUEST: only treat sensitive data or money as requested when the sender is asking the recipient to disclose, send, transfer, enter, confirm, or otherwise provide it.
@@ -610,62 +577,14 @@ def safe_risk_score(value, default=50):
 
 
 def apply_semantic_risk_floor(result):
-    """Apply universal deterministic floors from structured evidence.
+    """Apply only deterministic floors that do not depend on model prose.
 
-    The model extracts semantic evidence; backend code enforces only broad,
-    consequence-based minimums. This avoids phrase-specific hard-coding while
-    preventing a clearly stronger evidence combination from receiving a weaker score.
-    Floors never reduce a model score.
+    Text and call risk are calibrated in one shared evidence model in SYSTEM_PROMPT.
+    Independent machine evidence such as Web Risk is applied by the endpoint before
+    this function. Do not re-classify the model's explanation text here: wording in
+    summaries/signals is non-canonical and made identical inputs unstable.
     """
     score = safe_risk_score(result.get("risk_score"), default=50)
-    evidence = result.get("evidence")
-    if not isinstance(evidence, dict):
-        evidence = {}
-
-    action = str(evidence.get("requested_action", "none"))
-    contradiction = str(evidence.get("context_consistency", "unknown"))
-    pressure = str(evidence.get("pressure", "none"))
-    technical = str(evidence.get("technical_evidence", "none"))
-    relationship = str(evidence.get("relationship_stage", "unknown"))
-    claimed_context = str(evidence.get("claimed_context", "other"))
-    safety_exposure = evidence.get("personal_safety_exposure") is True
-
-    consequential_actions = {
-        "continue_engagement",
-        "travel_meeting",
-        "payment_transfer",
-        "sensitive_information",
-        "authentication_credential",
-        "app_install_remote_access",
-    }
-
-    # A concrete contradiction about the claimed prior situation plus a request
-    # to continue or take a consequential action is strong deception evidence.
-    if contradiction == "directly_contradictory" and action in consequential_actions:
-        score = max(score, 75)
-
-    # These actions/evidence combinations have high inherent compromise potential.
-    if action in {"authentication_credential", "app_install_remote_access"}:
-        score = max(score, 75)
-    if technical in {"known_threat_match", "credential_harvesting"}:
-        score = max(score, 75)
-
-    # Coercive financial or sensitive-data requests are strong combined evidence.
-    if pressure in {"threat", "secrecy_coercion"} and action in {
-        "payment_transfer", "sensitive_information", "authentication_credential"
-    }:
-        score = max(score, 75)
-
-    # New/rapid trust building combined with real-world vulnerability is meaningful
-    # even without a financial request.
-    if relationship == "new_rapid_trust_building" and safety_exposure:
-        score = max(score, 40)
-
-    # Unsolicited investment-style engagement should not be treated as ordinary LOW
-    # merely because no payment has yet been requested.
-    if claimed_context == "investment_financial" and action == "continue_engagement":
-        score = max(score, 35)
-
     result["risk_score"] = score
     if score <= 29:
         result["risk"] = "LOW"
@@ -674,6 +593,7 @@ def apply_semantic_risk_floor(result):
     else:
         result["risk"] = "HIGH"
     return result
+
 
 def normalise_result(result):
     risk = str(result.get("risk", "CAUTION")).upper()
@@ -1046,8 +966,7 @@ Do not describe a legitimate payment intermediary as suspicious simply because i
         # risk here; this avoids an attacker gaming a LOW override with crafted text.
         if screenshot_web_risk and screenshot_web_risk.get("threat"):
             result["risk"] = "HIGH"
-            result["risk_score"] = max(75, safe_risk_score(result.get("risk_score"), default=75))
-        result = apply_semantic_risk_floor(result)
+            result["risk_score"] = max(70, safe_risk_score(result.get("risk_score"), default=70))
         return normalise_result(result)
 
     except Exception as exc:
