@@ -245,6 +245,22 @@ Return ONLY valid JSON using this exact structure:
   "language": "detected language"
 }
 
+Universal decision process:
+Before producing the final JSON, internally build one evidence ledger from the submitted content, optional user context, and independent machine checks. Use that same process in message, call, link and screenshot modes.
+
+First separate established facts from unknowns. Then classify only evidence that is actually established across these dimensions: requested action and consequence, claimed situation, expectedness, identity and relationship evidence, pressure or coercion, money or sensitive data, technical evidence, transaction consistency, personal safety exposure, and contradictions.
+
+Optional user context is user reported evidence, not independently verified fact. Use it when it materially changes expectedness, prior events, relationships or consistency. Do not let a user's conclusion such as "this is safe" or "this is a scam" dictate the result. If the user says contact was expected, do not call it unsolicited unless other evidence establishes otherwise. If the submitted content claims the user previously completed, requested, purchased, authorised, applied for or initiated something and the user explicitly says they did not, treat that direct contradiction as meaningful evidence and increase risk proportionately to the possible harm. No user context means expectedness is unknown and neutral.
+
+After assessing the evidence, perform an internal consistency check before returning JSON:
+1. Every warning signal must be supported by established evidence, not an unknown or hypothetical possibility.
+2. The score must reflect the combined evidence and must not contradict the explanation.
+3. Stronger established evidence must not produce a lower score than otherwise equivalent weaker evidence.
+4. The same evidence must be treated equivalently across message, call and screenshot modes unless that mode supplies genuinely additional evidence.
+5. Do not invent money requests, sender history, identity facts, website behaviour or other facts not present in the evidence.
+6. Uncertainty belongs under uncertainty and must not silently become a warning signal.
+If the draft result fails any check, correct it before returning the final JSON.
+
 Universal evidence model:
 Judge behaviours and relationships between facts, not exact wording, brand names, countries, currencies, or memorised scam scripts. Semantically equivalent wording in any language must be treated equivalently.
 
