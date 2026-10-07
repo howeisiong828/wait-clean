@@ -233,15 +233,24 @@ Return ONLY valid JSON using this exact structure:
 
 {
   "risk": "LOW" | "CAUTION" | "HIGH",
-  "risk_score" 0,
+  "risk_score": 0,
+  "evidence": {
+    "requested_action": "none" | "ordinary_action" | "continue_engagement" | "travel_meeting" | "payment_transfer" | "sensitive_information" | "authentication_credential" | "app_install_remote_access",
+    "money_direction": "none" | "sender_offering_to_user" | "user_paying_sender_or_third_party" | "unclear",
+    "claimed_context": "ordinary_social_commercial" | "relationship_trust_building" | "recruitment_job" | "prize_reward" | "investment_financial" | "authority_impersonation" | "delivery_account_support" | "other",
+    "expectedness": "expected" | "explicitly_unexpected" | "unknown",
+    "context_consistency": "consistent" | "unknown" | "directly_contradictory",
+    "pressure": "none" | "normal_scheduling" | "urgency" | "threat" | "secrecy_coercion",
+    "verification_quality": "concrete_independent_route" | "limited_identity_detail" | "contradictory_deceptive_identity" | "unknown",
+    "transaction_consistency": "consistent" | "unknown" | "conflicting",
+    "technical_evidence": "known_threat_match" | "deceptive_lookalike_url" | "credential_harvesting" | "none",
+    "relationship_stage": "established_ordinary" | "unknown" | "new_rapid_trust_building",
+    "personal_safety_exposure": true | false
+  },
   "summary": "short plain-language assessment",
-  "signals": [
-    "specific reason based on the submitted content"
-  ],
+  "signals": ["specific reason based on the submitted content"],
   "uncertainty": "what cannot be verified from the submitted content",
-  "actions": [
-    "practical next step appropriate to the actual risk; for LOW risk with no meaningful scam indicators, avoid unnecessary warnings or verification steps"
-  ],
+  "actions": ["practical next step appropriate to the actual risk; for LOW risk with no meaningful scam indicators, avoid unnecessary warnings or verification steps"],
   "language": "detected language"
 }
 
@@ -601,14 +610,62 @@ def safe_risk_score(value, default=50):
 
 
 def apply_semantic_risk_floor(result):
-    """Apply only deterministic floors that do not depend on model prose.
+    """Apply universal deterministic floors from structured evidence.
 
-    Text and call risk are calibrated in one shared evidence model in SYSTEM_PROMPT.
-    Independent machine evidence such as Web Risk is applied by the endpoint before
-    this function. Do not re-classify the model's explanation text here: wording in
-    summaries/signals is non-canonical and made identical inputs unstable.
+    The model extracts semantic evidence; backend code enforces only broad,
+    consequence-based minimums. This avoids phrase-specific hard-coding while
+    preventing a clearly stronger evidence combination from receiving a weaker score.
+    Floors never reduce a model score.
     """
     score = safe_risk_score(result.get("risk_score"), default=50)
+    evidence = result.get("evidence")
+    if not isinstance(evidence, dict):
+        evidence = {}
+
+    action = str(evidence.get("requested_action", "none"))
+    contradiction = str(evidence.get("context_consistency", "unknown"))
+    pressure = str(evidence.get("pressure", "none"))
+    technical = str(evidence.get("technical_evidence", "none"))
+    relationship = str(evidence.get("relationship_stage", "unknown"))
+    claimed_context = str(evidence.get("claimed_context", "other"))
+    safety_exposure = evidence.get("personal_safety_exposure") is True
+
+    consequential_actions = {
+        "continue_engagement",
+        "travel_meeting",
+        "payment_transfer",
+        "sensitive_information",
+        "authentication_credential",
+        "app_install_remote_access",
+    }
+
+    # A concrete contradiction about the claimed prior situation plus a request
+    # to continue or take a consequential action is strong deception evidence.
+    if contradiction == "directly_contradictory" and action in consequential_actions:
+        score = max(score, 75)
+
+    # These actions/evidence combinations have high inherent compromise potential.
+    if action in {"authentication_credential", "app_install_remote_access"}:
+        score = max(score, 75)
+    if technical in {"known_threat_match", "credential_harvesting"}:
+        score = max(score, 75)
+
+    # Coercive financial or sensitive-data requests are strong combined evidence.
+    if pressure in {"threat", "secrecy_coercion"} and action in {
+        "payment_transfer", "sensitive_information", "authentication_credential"
+    }:
+        score = max(score, 75)
+
+    # New/rapid trust building combined with real-world vulnerability is meaningful
+    # even without a financial request.
+    if relationship == "new_rapid_trust_building" and safety_exposure:
+        score = max(score, 40)
+
+    # Unsolicited investment-style engagement should not be treated as ordinary LOW
+    # merely because no payment has yet been requested.
+    if claimed_context == "investment_financial" and action == "continue_engagement":
+        score = max(score, 35)
+
     result["risk_score"] = score
     if score <= 29:
         result["risk"] = "LOW"
@@ -617,7 +674,6 @@ def apply_semantic_risk_floor(result):
     else:
         result["risk"] = "HIGH"
     return result
-
 
 def normalise_result(result):
     risk = str(result.get("risk", "CAUTION")).upper()
@@ -990,7 +1046,8 @@ Do not describe a legitimate payment intermediary as suspicious simply because i
         # risk here; this avoids an attacker gaming a LOW override with crafted text.
         if screenshot_web_risk and screenshot_web_risk.get("threat"):
             result["risk"] = "HIGH"
-            result["risk_score"] = max(70, safe_risk_score(result.get("risk_score"), default=70))
+            result["risk_score"] = max(75, safe_risk_score(result.get("risk_score"), default=75))
+        result = apply_semantic_risk_floor(result)
         return normalise_result(result)
 
     except Exception as exc:
