@@ -227,19 +227,6 @@ Judge the behavioural combination, not individual words, names, languages, relat
 or memorised scam scripts. Genuine referrals with concrete verifiable context and routine contact
 updates from an already established conversation should not be raised for this reason alone.
 
-Universal trust-transfer awareness:
-When a new or otherwise unverified contact invokes a trusted third party or relationship as the reason
-the recipient should recognise or engage with them, such as "your father gave me your number",
-"a mutual friend referred me", "your colleague asked me to contact you", or semantically equivalent
-wording in any language, recognise and explain that this is a trust-transfer / relationship-establishment
-mechanism. It may be completely genuine and, by itself, must not force CAUTION or HIGH. If there is no
-consequential request or other meaningful warning sign, LOW can remain appropriate, but the summary or
-signals should still tell the user that the claimed connection cannot be verified from the message alone
-and could be used to establish trust. If later evidence adds money, credentials, investment, travel,
-secrecy, pressure, suspicious links, identity substitution or another consequential action, treat the
-earlier trust transfer as supporting evidence in the combined assessment. Apply this by meaning, not by
-specific names, family terms, languages, countries or memorised scripts.
-
 Never say something is "safe" simply because obvious scam indicators are absent.
 
 Return ONLY valid JSON using this exact structure:
