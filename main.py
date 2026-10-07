@@ -799,6 +799,7 @@ async def analyze(req: TextRequest, request: Request):
 
     web_risk_result = None
     domain_resolution = None
+    rdap_result = None
     checked_url = None
     if mode == "link":
         checked_url = normalise_url_for_check(text)
@@ -807,9 +808,9 @@ async def analyze(req: TextRequest, request: Request):
 
         domain_resolution = await check_domain_resolution(checked_url)
 
-        # RDAP prototype: collect registration availability for diagnostics only.
-        # It is intentionally not passed to the model or scoring yet.
-        await check_rdap_registration(checked_url)
+        # Public RDAP registration facts are supporting evidence only.
+        # Lookup failure must never block or fail the scan.
+        rdap_result = await check_rdap_registration(checked_url)
 
         if WEB_RISK_API_KEY:
             web_risk_result = await check_web_risk(checked_url)
@@ -857,6 +858,18 @@ Interpret domain resolution carefully:
 - "does_not_resolve" means the submitted hostname did not resolve at the time of this check. Say clearly: "The domain does not currently resolve." Keep uncertainty strictly about DNS and the submitted URL. Do NOT say or imply that the website/site/content/destination "cannot be accessed", "could not be accessed", "cannot be inspected", "could not be inspected", "cannot be verified", "could not be verified", "was unreachable", or similar. Those phrases falsely imply this checker attempted to visit or inspect the destination. A suitable action is to check that the URL was copied correctly and independently confirm the intended address with the sender or organisation. Do NOT call it a scam merely because it does not resolve.
 - "unknown" means the DNS check was inconclusive or timed out. Treat that as uncertainty, not as a warning sign.
 UNIVERSAL LINK-CHECK CAPABILITY RULE: This checker does not open, visit, fetch, browse, load, inspect, or follow the submitted website/destination. This is true whether DNS resolves, does not resolve, or is unknown. Never use wording that implies an attempt was made to access or inspect website content. Describe only evidence actually checked: the submitted URL structure, DNS resolution status, Google Web Risk result, and any other explicitly supplied evidence. In "What we cannot verify", use neutral wording such as "This check does not verify the website's content, ownership, legitimacy or safety" rather than attributing that limitation to DNS failure.
+
+Public RDAP registration data:
+Status: {rdap_result.get("status") if rdap_result else "unavailable"}
+Registration date: {rdap_result.get("registration_date") if rdap_result and rdap_result.get("registration_date") else "unknown"}
+Registrar handle: {rdap_result.get("registrar_handle") if rdap_result and rdap_result.get("registrar_handle") else "unknown"}
+
+Interpret RDAP conservatively:
+- Registration data is supporting evidence only. A recently registered domain is NOT proof of a scam and must never by itself make a link HIGH risk.
+- An old domain is NOT proof of safety.
+- If the registration date is recent, state that factual age signal clearly, but combine it with independent evidence before materially escalating risk.
+- If RDAP is unavailable, unsupported, incomplete or times out, treat that as neutral uncertainty and do not raise the score.
+- Registrar identity is administrative registration information, not proof that the registrar endorses or operates the website.
 
 Google Web Risk lookup status:
 {web_risk_result.get("status") if web_risk_result else "unavailable"}
