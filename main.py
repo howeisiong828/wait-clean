@@ -264,15 +264,23 @@ If the draft result fails any check, correct it before returning the final JSON.
 Universal evidence model:
 Judge behaviours and relationships between facts, not exact wording, brand names, countries, currencies, or memorised scam scripts. Semantically equivalent wording in any language must be treated equivalently.
 
-Before choosing a score, reason from these general evidence dimensions when they are actually established by the submitted content:
-- requested_action: none, ordinary action, travel/meeting, payment/transfer, sensitive-information disclosure, authentication credential, app install/remote access
+Before choosing a score, construct and use this fixed evidence ledger internally. Do not skip a field merely because another signal looks suspicious:
+- requested_action: none, ordinary action, continue engagement, travel/meeting, payment/transfer, sensitive-information disclosure, authentication credential, app install/remote access
+- money_direction: none, sender/offering-to-user, user/paying-sender-or-third-party, or unclear. Never convert money offered to the user into a request for the user to pay.
 - claimed_context: ordinary social/commercial, relationship/trust-building, recruitment/job, prize/reward, investment/financial, authority/impersonation, delivery/account support
+- expectedness: expected, explicitly unexpected, or unknown. Unknown is neutral.
+- context_consistency: consistent, unknown, or directly contradictory. A direct contradiction means the submitted content claims a prior event, transaction, relationship or authorisation that explicit user context says did not happen.
 - pressure: none, normal scheduling, urgency, threat, secrecy or coercion
 - verification_quality: concrete independent verification route, limited identity detail, or contradictory/deceptive identity evidence
 - transaction_consistency: consistent, unknown, or conflicting payee/merchant/payment details
 - technical_evidence: known threat match, deceptive/lookalike URL, credential harvesting, or none
 - relationship_stage: established/ordinary, unknown, or newly established/rapid trust-building
 - personal_safety_exposure: whether the requested action would move the user from a remote conversation into a materially more vulnerable real-world situation, such as travelling to meet a recently known or primarily online contact, surrendering control of transport/accommodation/documents, or becoming dependent on that contact in an unfamiliar setting
+
+Scoring calibration for contradictions:
+A direct contradiction about a claimed prior event, transaction, relationship or authorisation is strong deception evidence when the content also asks the user to take a consequential next action such as following a link, continuing an account or survey process, contacting another channel, providing information, travelling, paying, or authenticating. That combination should normally be at least HIGH unless reliable independent evidence resolves the contradiction. Increase further when money loss, credentials, identity data, coercion, remote access or personal safety exposure is also present.
+Do not apply this floor when context is merely absent, uncertain, or unverifiable. Do not apply it merely because the user says "this is a scam"; the contradiction must concern a concrete factual claim.
+When explicit user context confirms the claimed prior event and expected follow-up, remove any risk attributed solely to unexpectedness or that alleged contradiction. Independent warning evidence remains.
 
 Use combinations rather than isolated terms.
 Personal-safety exposure is itself meaningful evidence even when no money, credential or suspicious link is requested. When the submitted content establishes a newly formed or rapidly intensified relationship AND asks the user to travel or place themselves in a materially dependent/vulnerable in-person situation, normally use at least CAUTION. This is not because romance, travel, a destination, or a new relationship is inherently suspicious; it is because the combination increases real-world safety exposure while identity and intentions remain uncertain. Keep ordinary established social visits LOW when that combination is absent. A normal notification that merely mentions an account, salary, funds, identity document, travel, QR code or payment is not suspicious by itself. Distinguish MENTION from REQUEST: only treat sensitive data or money as requested when the sender is asking the recipient to disclose, send, transfer, enter, confirm, or otherwise provide it.
