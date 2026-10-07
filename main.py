@@ -732,8 +732,7 @@ Submitted message:
                 "error": "We could not complete the AI analysis."
             }
     
-@app.post("/analyze-image")
-async def analyze_image(
+async def _analyze_image_impl(
     file: UploadFile = File(...),
     context: Optional[str] = Form(None),
 request: Request = None,
@@ -923,6 +922,29 @@ Do not describe a legitimate payment intermediary as suspicious simply because i
         "error": "We could not analyse this screenshot."
     }
         
+
+
+@app.post("/analyze-image")
+async def analyze_image(
+    file: UploadFile = File(...),
+    context: Optional[str] = Form(None),
+    request: Request = None,
+):
+    import asyncio
+    try:
+        # One ceiling for the complete screenshot pipeline, including QR,
+        # URL reputation checks, visible-URL extraction and final AI analysis.
+        # Keep it below one minute so the app can fail cleanly before upstream
+        # client or proxy timeouts leave the user waiting indefinitely.
+        return await asyncio.wait_for(
+            _analyze_image_impl(file=file, context=context, request=request),
+            timeout=55.0,
+        )
+    except asyncio.TimeoutError:
+        print("ANALYZE_IMAGE_TIMEOUT: pipeline exceeded 55 seconds", flush=True)
+        return {
+            "error": "We could not complete this screenshot check within one minute. Please try again."
+        }
 
 
 @app.get("/", response_class=HTMLResponse)
