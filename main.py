@@ -448,56 +448,80 @@ def qr_http_url(value: str):
     return normalise_url_for_check(value)
 
 
-async def check_rdap_registration(url: str):
-    """Prototype RDAP lookup for domain registration facts.
+_rdap_bootstrap_cache = {"expires": 0.0, "services": []}
 
-    This is deliberately observational only: it does not affect scoring,
-    prompts, explanations or the API response. Failure is silent to the scan.
+
+async def check_rdap_registration(url: str):
+    """Read public domain registration facts through the IANA RDAP bootstrap.
+
+    Only RDAP registry services are contacted. The submitted website is never
+    visited. Missing, unsupported or failed lookups remain neutral.
     """
     checked_url = normalise_url_for_check(url)
     hostname = urlparse(checked_url).hostname if checked_url else None
     if not hostname:
         return {"status": "invalid"}
-
-    # Start with the common gTLD RDAP service. Unsupported TLDs simply fail open.
-    endpoint = f"https://rdap.verisign.com/com/v1/domain/{hostname}" if hostname.endswith(".com") else None
-    if not endpoint:
-        return {"status": "unsupported"}
-
     try:
+        hostname = hostname.rstrip(".").encode("idna").decode("ascii").lower()
+        labels = hostname.split(".")
+        if len(labels) < 2 or any(not part for part in labels):
+            return {"status": "unsupported"}
+
         async with httpx.AsyncClient(timeout=3.0, follow_redirects=False) as client:
-            response = await client.get(
-                endpoint,
-                headers={"Accept": "application/rdap+json, application/json"},
-            )
-        if response.status_code != 200:
-            print("RDAP_STATUS: HTTP", response.status_code, flush=True)
-            return {"status": "unavailable"}
+            if time.monotonic() >= _rdap_bootstrap_cache["expires"]:
+                bootstrap = await client.get("https://data.iana.org/rdap/dns.json")
+                bootstrap.raise_for_status()
+                services = bootstrap.json().get("services", [])
+                if not isinstance(services, list):
+                    return {"status": "unavailable"}
+                _rdap_bootstrap_cache["services"] = services
+                _rdap_bootstrap_cache["expires"] = time.monotonic() + 86400
 
-        data = response.json()
-        created = None
-        for event in data.get("events", []):
-            if event.get("eventAction") == "registration":
-                created = event.get("eventDate")
-                break
+            tld = labels[-1]
+            bases = []
+            for service in _rdap_bootstrap_cache["services"]:
+                if (isinstance(service, list) and len(service) == 2
+                        and isinstance(service[0], list) and isinstance(service[1], list)
+                        and tld in [str(x).lower() for x in service[0]]):
+                    bases = [b for b in service[1] if isinstance(b, str) and b.startswith("https://")]
+                    break
+            if not bases:
+                return {"status": "unsupported"}
 
-        registrar = None
-        for entity in data.get("entities", []):
-            if "registrar" in entity.get("roles", []):
-                registrar = entity.get("handle")
-                break
-
-        print(
-            "RDAP_STATUS: success",
-            "created=" + ("yes" if created else "no"),
-            "registrar=" + ("yes" if registrar else "no"),
-            flush=True,
-        )
-        return {
-            "status": "success",
-            "registration_date": created,
-            "registrar_handle": registrar,
-        }
+            # Try the full hostname, then strip leftmost subdomains. RDAP 404
+            # means the name may be a subdomain rather than a registered domain.
+            # Never query a bare TLD.
+            for count in range(len(labels), 1, -1):
+                candidate = ".".join(labels[-count:])
+                endpoint = bases[0].rstrip("/") + "/domain/" + candidate
+                response = await client.get(
+                    endpoint, headers={"Accept": "application/rdap+json, application/json"}
+                )
+                if response.status_code in (400, 404):
+                    continue
+                if response.status_code != 200:
+                    print("RDAP_STATUS: HTTP", response.status_code, flush=True)
+                    return {"status": "unavailable"}
+                data = response.json()
+                if not isinstance(data, dict):
+                    return {"status": "unavailable"}
+                returned_name = str(data.get("ldhName") or data.get("unicodeName") or "").rstrip(".").lower()
+                if returned_name and returned_name.encode("idna").decode("ascii") != candidate:
+                    continue
+                created = next(
+                    (e.get("eventDate") for e in data.get("events", [])
+                     if isinstance(e, dict) and e.get("eventAction") == "registration"), None
+                )
+                registrar = next(
+                    (e.get("handle") for e in data.get("entities", [])
+                     if isinstance(e, dict) and "registrar" in e.get("roles", [])), None
+                )
+                print("RDAP_STATUS: success",
+                      "created=" + ("yes" if created else "no"),
+                      "registrar=" + ("yes" if registrar else "no"), flush=True)
+                return {"status": "success", "registration_date": created,
+                        "registrar_handle": registrar}
+        return {"status": "unavailable"}
     except Exception as exc:
         print("RDAP_STATUS: error", type(exc).__name__, flush=True)
         return {"status": "unavailable"}
